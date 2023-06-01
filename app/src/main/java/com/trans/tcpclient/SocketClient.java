@@ -11,7 +11,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -28,23 +27,28 @@ import java.util.Enumeration;
  */
 public class SocketClient {
     private static String TAG = "SocketClient";
-    private static String hostname = "172.19.250.161"; // 服务器IP
+        private static String hostname = "172.19.250.161"; // 手机服务器IP
+//    private static String hostname = "192.168.10.123"; // obu设备IP
+//    private static String hostname = "172.19.250.13"; // 网络调试助手IP
     private static int port = 12345; // 端口
+//    private static int port = 7130; // obu设备端口
     private static Socket socket;
     static Runnable net = new Runnable() {
         @Override
         public void run() {
             try {
                 //socket=new Socket("192.168.1.102", 12345);//注意这里
+                Log.e(TAG, "Init");
                 socket = new Socket();
-                Log.e(TAG, "启动客户端");
+                Log.e(TAG, "start");
                 SocketAddress socAddress = new InetSocketAddress(hostname, port);
+                Log.e(TAG, "启动客户端");
                 socket.connect(socAddress, 3000);//超时3秒
-                Log.e(TAG, "客户端连接成功（超时3秒）");
+                Log.e(TAG, "连接服务器成功（超时值3秒）");  // 连接服务器成功，并进入阻塞状态...
                 // 监听服务端
                 getServiceData();
                 // 发送数据到客户端
-                sendACKData(); // 代码不执行
+//                sendACKData(); // 代码不执行
             } catch (Exception e) {
                 Log.e(TAG, "链接错误:" + e);
                 e.printStackTrace();
@@ -62,14 +66,19 @@ public class SocketClient {
             inputStream = socket.getInputStream();
             byte[] buffer = new byte[1024];
             int len = -1;
+            String datas = "";
             while ((len = inputStream.read(buffer)) != -1) {
                 String data = new String(buffer, 0, len);
                 Log.e(TAG, "收到服务端数据:" + data);
+                datas += data;
             }
-            Log.e(TAG, "客户端断开连接");
+            Log.e(TAG, "datas:" + datas);
+            Log.e(TAG, "客户端-服务器: 断开连接");
 //            pw.close();
         } catch (IOException e) {
             Log.e(TAG, "接收服务端数据错误:" + e);
+        } finally {
+            Log.e(TAG, "end");
         }
     }
 

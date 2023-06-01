@@ -16,7 +16,9 @@ import java.net.InetAddress;
 public class DatagramSocketClient {
     private static final String TAG = "DatagramSocketClient";
     private static String ip = "172.19.250.161"; // IP
+    //    private static String ip = "192.168.110.1"; // obu设备IP
     private static int port = 56789; // 端口
+//    private static int port = 22; // 端口
 
     private static final int TIMEOUT = 3000;  // 阻塞时长
     private static final int RETRY_NUM = 5000;
