@@ -1,11 +1,24 @@
 package com.trans.tcpclient;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -19,6 +32,9 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Tom灿
@@ -27,12 +43,15 @@ import java.util.Enumeration;
  */
 public class SocketClient {
     private static String TAG = "SocketClient";
-        private static String hostname = "172.19.250.161"; // 手机服务器IP
+    //        private static String hostname = "172.19.250.161"; // 手机服务器IP
 //    private static String hostname = "192.168.10.123"; // obu设备IP
-//    private static String hostname = "172.19.250.13"; // 网络调试助手IP
-    private static int port = 12345; // 端口
-//    private static int port = 7130; // obu设备端口
+    private static String hostname = "172.19.250.13"; // 网络调试助手IP
+    //    private static int port = 12345; // 手机服务器端口
+    private static int port = 7130; // obu设备端口
     private static Socket socket;
+    public static OnServiceDataListener onServiceDataListener;
+    public final static Gson gson = new Gson();
+    private static boolean isSubPackage = false;
     static Runnable net = new Runnable() {
         @Override
         public void run() {
@@ -42,9 +61,10 @@ public class SocketClient {
                 socket = new Socket();
                 Log.e(TAG, "start");
                 SocketAddress socAddress = new InetSocketAddress(hostname, port);
-                Log.e(TAG, "启动客户端");
+                Log.e(TAG, "启动客户端:正在与服务器建立连接......");
                 socket.connect(socAddress, 3000);//超时3秒
                 Log.e(TAG, "连接服务器成功（超时值3秒）");  // 连接服务器成功，并进入阻塞状态...
+                handler.sendEmptyMessage(10001);
                 // 监听服务端
                 getServiceData();
                 // 发送数据到客户端
@@ -64,21 +84,42 @@ public class SocketClient {
         try {
 //            PrintWriter pw = new PrintWriter(socket.getOutputStream());
             inputStream = socket.getInputStream();
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[1024 * 2];
             int len = -1;
-            String datas = "";
+//            String datas = "";
+            StringBuilder stringBuilder = new StringBuilder(); // 高效处理分包数据
             while ((len = inputStream.read(buffer)) != -1) {
                 String data = new String(buffer, 0, len);
                 Log.e(TAG, "收到服务端数据:" + data);
-                datas += data;
+                if (isJson(data) && !isSubPackage) {
+                    handler.sendMessage(handler.obtainMessage(10002, data));
+                } else { // 分包处理
+                    isSubPackage = true;
+//                    datas += data;
+                    stringBuilder.append(data);
+                    /**
+                     *  每次都去判断一下分包数据是否接收完毕
+                     *  判断依据为: 通过是否接收了一个完整的json格式数据判断，
+                     *  当拼接成一个完整的json格式数据的时候，说明分包数据已发送完毕。
+                     */
+                    String jsonData = stringBuilder.toString();
+                    if (isJson(jsonData)) {
+                        isSubPackage = false;
+                        handler.sendMessage(handler.obtainMessage(10002, jsonData));
+//                        datas = "";
+                        stringBuilder.delete(0, stringBuilder.length());
+                    }
+                }
             }
-            Log.e(TAG, "datas:" + datas);
+//            Log.e(TAG, "datas:" + datas);
             Log.e(TAG, "客户端-服务器: 断开连接");
 //            pw.close();
         } catch (IOException e) {
             Log.e(TAG, "接收服务端数据错误:" + e);
+            handler.sendMessage(handler.obtainMessage(10004, e.toString()));
         } finally {
             Log.e(TAG, "end");
+            handler.sendEmptyMessage(10003);
         }
     }
 
@@ -129,6 +170,51 @@ public class SocketClient {
             }
             Log.e(TAG, "客户端关闭");
         }
+    }
+
+
+    @SuppressLint("HandlerLeak")
+    private static Handler handler = new Handler() {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 10001: // 连接成功
+                    if (onServiceDataListener != null)
+                        onServiceDataListener.connect();
+                    break;
+
+                case 10002: // 收到数据
+                    if (onServiceDataListener != null)
+                        onServiceDataListener.receive((String) msg.obj);
+                    break;
+
+                case 10003: // 断开连接
+                    if (onServiceDataListener != null)
+                        onServiceDataListener.offline();
+                    break;
+
+                case 10004: // 接收异常
+                    if (onServiceDataListener != null)
+                        onServiceDataListener.error((String) msg.obj);
+                    break;
+            }
+        }
+    };
+
+    public static void connect() {
+        new Thread(SocketClient.net).start();
+    }
+
+
+    interface OnServiceDataListener {
+        void connect();
+
+        void receive(String data);
+
+        void offline();
+
+        void error(String e);
     }
 
 
@@ -183,6 +269,67 @@ public class SocketClient {
                 ((ip >> 8) & 0xFF) + "." +
                 ((ip >> 16) & 0xFF) + "." +
                 (ip >> 24 & 0xFF);
+    }
+
+    /**
+     * 获取OBU数据类型
+     *
+     * @param dataKey
+     * @return
+     */
+    public static String getOBUType(String dataKey) {
+        try {
+
+            JSONObject jsonObject = new JSONObject(dataKey);
+//            JSONArray jsonArray = new JSONArray(dataKey);
+//            JSONObject base = jsonObject.getJSONObject("base");
+            Iterator<String> keys = jsonObject.keys();
+            String next = keys.next();
+            Log.e(TAG, "getOBUType: " + next); // RSM
+
+            JsonParser jsonParser = new JsonParser();
+            JsonElement parse = jsonParser.parse(dataKey);
+            Set<String> strings1 = parse.getAsJsonObject().keySet();
+            Log.e(TAG, "getOBUType: " + strings1);  //[RSM]
+//            if (parse.isJsonNull() || !parse.isJsonObject()) {
+//                Log.e(TAG, "not json data");
+//                return "not json data";
+//            }
+
+            JsonObject jsonObject2 = new JsonObject();
+            jsonObject2.add("jsonKey", parse);
+            Set<String> strings2 = jsonObject2.keySet();
+            String next1 = strings2.iterator().next();
+            Log.e(TAG, "getOBUType: " + next1); // jsonKey
+
+            Map<String, JsonElement> stringJsonElementMap = jsonObject2.asMap();
+            Set<String> strings = stringJsonElementMap.keySet();
+            String next2 = strings.iterator().next();
+            Log.e(TAG, "getOBUType: " + next2); // jsonKey
+
+            return next;
+        } catch (JSONException e) {
+            Log.e(TAG, "getOBUType: Exception" + e);
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private static final JsonParser jsonParser = new JsonParser();
+
+    /**
+     * 判断是否为Json格式数据
+     *
+     * @param json
+     * @return
+     */
+    private static boolean isJson(String json) {
+        try {
+            jsonParser.parse(json);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
 }

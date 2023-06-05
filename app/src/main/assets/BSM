@@ -1,0 +1,35 @@
+{
+    "BSM": {
+        "accelSet": {
+            "lat": 0,
+            "long": 0,
+            "vert": 0,
+            "yaw": 0
+        },
+        "brakes": {},
+        "heading": 89.55,
+        "hostFlag": 2,
+        "id": "6565656565656565",
+        "msg_id": 0,
+        "pcert_event": 0,
+        "pos": {
+            "elevation": 475.4,
+            "lat": 30.5403091,
+            "long": 104.0283342
+        },
+        "posConfidence": {
+            "elevation": 5,
+            "pos": 5
+        },
+        "size": {
+            "length": 5,
+            "width": 2
+        },
+        "speed": 10,
+        "transmission": 7,
+        "utcTime": 1621509594.516,
+        "vehicleClass": {
+            "classification": 10
+        }
+    }
+}

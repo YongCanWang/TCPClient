@@ -1,0 +1,196 @@
+{
+    "RSI": {
+        "id": "1112131415161718",
+        "refPos": {
+            "elevation": 400.1,
+            "lat": 30.540365,
+            "long": 104.034598
+        },
+        "rtes": [
+            {
+                "description": "dao lu shi hua",
+                "eventConfidence": 60,
+                "eventSource": 3,
+                "eventType": 408,
+                "priority": 50,
+                "referenceLinks": [
+                    {
+                        "downstreamNodeId": {
+                            "id": 1,
+                            "region": 0
+                        },
+                        "referenceLanes": 1,
+                        "upstreamNodeId": {
+                            "id": 3,
+                            "region": 0
+                        }
+                    }
+                ],
+                "referencePaths": [
+                    {
+                        "activePath": [
+                            {
+                                "lat": 30.5403033,
+                                "long": 104.0314659
+                            },
+                            {
+                                "lat": 30.5403069,
+                                "long": 104.0319879
+                            }
+                        ],
+                        "pathRadius": 4
+                    }
+                ],
+                "rteId": 1,
+                "timeDetails": {
+                    "endTime": 262441,
+                    "endTimeConfidence": 20,
+                    "startTime": 262432
+                }
+            },
+            {
+                "description": "jiao tong yong du",
+                "eventConfidence": 60,
+                "eventSource": 3,
+                "eventType": 707,
+                "priority": 50,
+                "referenceLinks": [
+                    {
+                        "downstreamNodeId": {
+                            "id": 1,
+                            "region": 0
+                        },
+                        "referenceLanes": 1,
+                        "upstreamNodeId": {
+                            "id": 3,
+                            "region": 0
+                        }
+                    }
+                ],
+                "referencePaths": [
+                    {
+                        "activePath": [
+                            {
+                                "lat": 30.5403984,
+                                "long": 104.0335535
+                            },
+                            {
+                                "lat": 30.5404019,
+                                "long": 104.0340755
+                            }
+                        ],
+                        "pathRadius": 4
+                    }
+                ],
+                "rteId": 1,
+                "timeDetails": {
+                    "endTime": 262441,
+                    "endTimeConfidence": 20,
+                    "startTime": 262432
+                }
+            },
+            {
+                "eventPos": {
+                    "elevation": 400.2,
+                    "lat": 30.540098,
+                    "long": 104.0356874
+                },
+                "eventRadius": 10,
+                "eventSource": 3,
+                "eventType": 308,
+                "rteId": 1
+            }
+        ],
+        "rtss": [
+            {
+                "description": "ji wan",
+                "priority": 70,
+                "referenceLinks": [
+                    {
+                        "downstreamNodeId": {
+                            "id": 1,
+                            "region": 0
+                        },
+                        "referenceLanes": 1,
+                        "upstreamNodeId": {
+                            "id": 2,
+                            "region": 0
+                        }
+                    }
+                ],
+                "referencePaths": [
+                    {
+                        "activePath": [
+                            {
+                                "lat": 30.5402963,
+                                "long": 104.0304217
+                            },
+                            {
+                                "lat": 30.5402998,
+                                "long": 104.0309438
+                            }
+                        ],
+                        "pathRadius": 4
+                    }
+                ],
+                "rtsId": 7,
+                "signPos": {
+                    "elevation": 400.2,
+                    "lat": 30.5402288,
+                    "long": 104.0304223
+                },
+                "signType": 2,
+                "timeDetails": {
+                    "endTime": 262461,
+                    "endTimeConfidence": 30,
+                    "startTime": 262452
+                }
+            },
+            {
+                "description": "dao lu shi gong",
+                "priority": 70,
+                "referenceLinks": [
+                    {
+                        "downstreamNodeId": {
+                            "id": 1,
+                            "region": 0
+                        },
+                        "referenceLanes": 1,
+                        "upstreamNodeId": {
+                            "id": 2,
+                            "region": 0
+                        }
+                    }
+                ],
+                "referencePaths": [
+                    {
+                        "activePath": [
+                            {
+                                "lat": 30.5403913,
+                                "long": 104.0325093
+                            },
+                            {
+                                "lat": 30.5403949,
+                                "long": 104.0330314
+                            }
+                        ],
+                        "pathRadius": 4
+                    }
+                ],
+                "rtsId": 7,
+                "signPos": {
+                    "elevation": 400.2,
+                    "lat": 30.5402288,
+                    "long": 104.0304223
+                },
+                "signType": 38,
+                "timeDetails": {
+                    "endTime": 262461,
+                    "endTimeConfidence": 30,
+                    "startTime": 262452
+                }
+            }
+        ],
+        "utcTime": 1621966329.978
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "TPM": {
+        "heading": 89.55,
+        "pos": {
+            "elevation": 475.4,
+            "lat": 30.5403091,
+            "long": 104.0283331
+        },
+        "posConfidence": {
+            "elevation": 5,
+            "pos": 5
+        },
+        "speed": 0,
+        "utcTime": 1621951794.516
+    }
+}

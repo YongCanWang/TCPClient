@@ -1,0 +1,79 @@
+{
+    "SPAT": {
+        "intersections": [
+            {
+                "intersectionId": {
+                    "id": 2,
+                    "region": 0
+                },
+                "phases": [
+                    {
+                        "id": 1,
+                        "phaseStates": [
+                            {
+                                "light": 3,
+                                "timing": {
+                                    "counting": {
+                                        "likelyEndTime": 41.225,
+                                        "startTime": 18.225
+                                    }
+                                }
+                            },
+                            {
+                                "light": 7,
+                                "timing": {
+                                    "counting": {
+                                        "likelyEndTime": 18.225,
+                                        "startTime": 15.225
+                                    }
+                                }
+                            },
+                            {
+                                "light": 5,
+                                "timing": {
+                                    "counting": {
+                                        "likelyEndTime": 15.225,
+                                        "startTime": 0
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 2,
+                        "phaseStates": [
+                            {
+                                "light": 3,
+                                "timing": {
+                                    "counting": {
+                                        "likelyEndTime": 18.225,
+                                        "startTime": 0
+                                    }
+                                }
+                            },
+                            {
+                                "light": 7,
+                                "timing": {
+                                    "counting": {
+                                        "likelyEndTime": 41.225,
+                                        "startTime": 38.225
+                                    }
+                                }
+                            },
+                            {
+                                "light": 5,
+                                "timing": {
+                                    "counting": {
+                                        "likelyEndTime": 38.225,
+                                        "startTime": 18.225
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "status": 32
+            }
+        ]
+    }
+}

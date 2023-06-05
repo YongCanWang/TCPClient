@@ -1,0 +1,42 @@
+{
+    "RSM": {
+        "id": "3132333435363738",
+        "participants": [
+            {
+                "accelSet": {
+                    "lat": 4,
+                    "long": 3,
+                    "vert": 0,
+                    "yaw": 0
+                },
+                "heading": 359.55,
+                "id": "4142434445464748",
+                "pos": {
+                    "lat": 30.5402083,
+                    "long": 104.0293783
+                },
+                "posConfidence": {
+                    "pos": 0
+                },
+                "ptcId": 1,
+                "ptcType": 3,
+                "size": {
+                    "length": 1,
+                    "width": 1
+                },
+                "source": 4,
+                "speed": 1,
+                "transmission": 1,
+                "utcTime": 1621961013.922,
+                "vehicleClass": {
+                    "classification": 82
+                }
+            }
+        ],
+        "refPos": {
+            "elevation": 400.1,
+            "lat": 30.540365,
+            "long": 104.034598
+        }
+    }
+}

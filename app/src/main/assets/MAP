@@ -1,0 +1,108 @@
+{
+    "MAP": {
+        "nodes": [
+            {
+                "id": {
+                    "id": 1,
+                    "region": 0
+                },
+                "inLinks": [
+                    {
+                        "lanes": [
+                            {
+                                "laneID": 1
+                            }
+                        ],
+                        "linkWidth": 9,
+                        "name": "link1",
+                        "points": [
+                            {
+                                "pos": {
+                                    "lat": 30.5402892,
+                                    "long": 104.0293775
+                                }
+                            },
+                            {
+                                "pos": {
+                                    "lat": 30.5403033,
+                                    "long": 104.0314659
+                                }
+                            }
+                        ],
+                        "speedLimits": [
+                            {
+                                "speed": 8.33,
+                                "type": 5
+                            }
+                        ],
+                        "upstreamNodeId": {
+                            "id": 4,
+                            "region": 0
+                        }
+                    }
+                ],
+                "name": "node1",
+                "refPos": {
+                    "lat": 30.540365,
+                    "long": 104.034598
+                }
+            },
+            {
+                "id": {
+                    "id": 2,
+                    "region": 0
+                },
+                "inLinks": [
+                    {
+                        "lanes": [
+                            {
+                                "laneID": 1
+                            }
+                        ],
+                        "linkWidth": 9,
+                        "movements": [
+                            {
+                                "phaseId": 1,
+                                "remoteIntersection": {
+                                    "id": 3,
+                                    "region": 0
+                                }
+                            }
+                        ],
+                        "name": "link1",
+                        "points": [
+                            {
+                                "pos": {
+                                    "lat": 30.540309,
+                                    "long": 104.0323012
+                                }
+                            },
+                            {
+                                "pos": {
+                                    "lat": 30.5403231,
+                                    "long": 104.0343895
+                                }
+                            }
+                        ],
+                        "speedLimits": [
+                            {
+                                "speed": 25,
+                                "type": 5
+                            }
+                        ],
+                        "upstreamNodeId": {
+                            "id": 1,
+                            "region": 0
+                        }
+                    }
+                ],
+                "name": "node2",
+                "refPos": {
+                    "lat": 30.540365,
+                    "long": 104.034598
+                }
+            }
+        ],
+        "utcTime": 1621964250.585
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "VIM": {
+        "brakes": {
+            "abs": {},
+            "brakePadel": {}
+        },
+        "emergencyExt": {
+            "responseType": {}
+        },
+        "safetyExt": {
+            "events": {},
+            "lights": {
+                "value": 0
+            }
+        }
+    }
+}
