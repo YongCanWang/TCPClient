@@ -1,4 +1,4 @@
-package com.trans.tcpclient.obu;
+package com.trans.libnet.tcpclient.obu;
 
 /**
  * @author Tom灿

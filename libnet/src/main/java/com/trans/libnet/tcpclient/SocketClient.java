@@ -1,4 +1,4 @@
-package com.trans.tcpclient;
+package com.trans.libnet.tcpclient;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -13,8 +13,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import org.json.JSONException;
@@ -33,8 +31,6 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Tom灿
@@ -207,7 +203,7 @@ public class SocketClient {
     }
 
 
-    interface OnServiceDataListener {
+    public interface OnServiceDataListener {
         void connect();
 
         void receive(String data);
@@ -287,25 +283,25 @@ public class SocketClient {
             String next = keys.next();
             Log.e(TAG, "getOBUType: " + next); // RSM
 
-            JsonParser jsonParser = new JsonParser();
-            JsonElement parse = jsonParser.parse(dataKey);
-            Set<String> strings1 = parse.getAsJsonObject().keySet();
-            Log.e(TAG, "getOBUType: " + strings1);  //[RSM]
+//            JsonParser jsonParser = new JsonParser();
+//            JsonElement parse = jsonParser.parse(dataKey);
+//            Set<String> strings1 = parse.getAsJsonObject().keySet();
+//            Log.e(TAG, "getOBUType: " + strings1);  //[RSM]
 //            if (parse.isJsonNull() || !parse.isJsonObject()) {
 //                Log.e(TAG, "not json data");
 //                return "not json data";
 //            }
 
-            JsonObject jsonObject2 = new JsonObject();
-            jsonObject2.add("jsonKey", parse);
-            Set<String> strings2 = jsonObject2.keySet();
-            String next1 = strings2.iterator().next();
-            Log.e(TAG, "getOBUType: " + next1); // jsonKey
-
-            Map<String, JsonElement> stringJsonElementMap = jsonObject2.asMap();
-            Set<String> strings = stringJsonElementMap.keySet();
-            String next2 = strings.iterator().next();
-            Log.e(TAG, "getOBUType: " + next2); // jsonKey
+//            JsonObject jsonObject2 = new JsonObject();
+//            jsonObject2.add("jsonKey", parse);
+//            Set<String> strings2 = jsonObject2.keySet();
+//            String next1 = strings2.iterator().next();
+//            Log.e(TAG, "getOBUType: " + next1); // jsonKey
+//
+//            Map<String, JsonElement> stringJsonElementMap = jsonObject2.asMap();
+//            Set<String> strings = stringJsonElementMap.keySet();
+//            String next2 = strings.iterator().next();
+//            Log.e(TAG, "getOBUType: " + next2); // jsonKey
 
             return next;
         } catch (JSONException e) {
@@ -330,6 +326,14 @@ public class SocketClient {
             return false;
         }
         return true;
+    }
+
+    public static void setHostname(String ip) {
+        SocketClient.hostname = ip;
+    }
+
+    public static void setPort(int port) {
+        SocketClient.port = port;
     }
 
 }

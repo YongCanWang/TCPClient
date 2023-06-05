@@ -1,4 +1,4 @@
-package com.trans.udpclinet;
+package com.trans.libnet.udpclinet;
 
 import android.util.Log;
 

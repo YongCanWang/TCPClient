@@ -5,17 +5,18 @@ import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.trans.tcpclient.SocketClient.OnServiceDataListener
-import com.trans.tcpclient.obu.Constants
-import com.trans.tcpclient.obu.OBU_BSM
-import com.trans.tcpclient.obu.OBU_HEART
-import com.trans.tcpclient.obu.OBU_MAP
-import com.trans.tcpclient.obu.OBU_RSI
-import com.trans.tcpclient.obu.OBU_RSM
-import com.trans.tcpclient.obu.OBU_SPAT
-import com.trans.tcpclient.obu.OBU_TPM
-import com.trans.tcpclient.obu.OBU_VIM
-import com.trans.udpclinet.DatagramSocketClient
+import com.trans.libnet.tcpclient.SocketClient
+import com.trans.libnet.tcpclient.SocketClient.OnServiceDataListener
+import com.trans.libnet.tcpclient.obu.Constants
+import com.trans.libnet.tcpclient.obu.OBU_BSM
+import com.trans.libnet.tcpclient.obu.OBU_HEART
+import com.trans.libnet.tcpclient.obu.OBU_MAP
+import com.trans.libnet.tcpclient.obu.OBU_RSI
+import com.trans.libnet.tcpclient.obu.OBU_RSM
+import com.trans.libnet.tcpclient.obu.OBU_SPAT
+import com.trans.libnet.tcpclient.obu.OBU_TPM
+import com.trans.libnet.tcpclient.obu.OBU_VIM
+import com.trans.libnet.udpclinet.DatagramSocketClient
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
