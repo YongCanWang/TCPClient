@@ -23,9 +23,9 @@ public class OBU_HEART {
 
     public static class HEARTBean {
         private String id;
-        private int devType;
-        private int count;
-        private int status;
+        private double devType;
+        private double count;
+        private double status;
         private String softVer;
 
         public String getId() {
@@ -36,27 +36,27 @@ public class OBU_HEART {
             this.id = id;
         }
 
-        public int getDevType() {
+        public double getDevType() {
             return devType;
         }
 
-        public void setDevType(int devType) {
+        public void setDevType(double devType) {
             this.devType = devType;
         }
 
-        public int getCount() {
+        public double getCount() {
             return count;
         }
 
-        public void setCount(int count) {
+        public void setCount(double count) {
             this.count = count;
         }
 
-        public int getStatus() {
+        public double getStatus() {
             return status;
         }
 
-        public void setStatus(int status) {
+        public void setStatus(double status) {
             this.status = status;
         }
 

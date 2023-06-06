@@ -88,12 +88,12 @@ public class OBU_RSM {
             private String id;
             private PosBean pos;
             private PosConfidenceBean posConfidence;
-            private int ptcId;
-            private int ptcType;
+            private double ptcId;
+            private double ptcType;
             private SizeBean size;
-            private int source;
-            private int speed;
-            private int transmission;
+            private double source;
+            private double speed;
+            private double transmission;
             private double utcTime;
             private VehicleClassBean vehicleClass;
 
@@ -137,19 +137,19 @@ public class OBU_RSM {
                 this.posConfidence = posConfidence;
             }
 
-            public int getPtcId() {
+            public double getPtcId() {
                 return ptcId;
             }
 
-            public void setPtcId(int ptcId) {
+            public void setPtcId(double ptcId) {
                 this.ptcId = ptcId;
             }
 
-            public int getPtcType() {
+            public double getPtcType() {
                 return ptcType;
             }
 
-            public void setPtcType(int ptcType) {
+            public void setPtcType(double ptcType) {
                 this.ptcType = ptcType;
             }
 
@@ -161,27 +161,27 @@ public class OBU_RSM {
                 this.size = size;
             }
 
-            public int getSource() {
+            public double getSource() {
                 return source;
             }
 
-            public void setSource(int source) {
+            public void setSource(double source) {
                 this.source = source;
             }
 
-            public int getSpeed() {
+            public double getSpeed() {
                 return speed;
             }
 
-            public void setSpeed(int speed) {
+            public void setSpeed(double speed) {
                 this.speed = speed;
             }
 
-            public int getTransmission() {
+            public double getTransmission() {
                 return transmission;
             }
 
-            public void setTransmission(int transmission) {
+            public void setTransmission(double transmission) {
                 this.transmission = transmission;
             }
 
@@ -202,41 +202,41 @@ public class OBU_RSM {
             }
 
             public static class AccelSetBean {
-                private int lat;
+                private double lat;
                 @SerializedName("long")
-                private int longX;
-                private int vert;
-                private int yaw;
+                private double longX;
+                private double vert;
+                private double yaw;
 
-                public int getLat() {
+                public double getLat() {
                     return lat;
                 }
 
-                public void setLat(int lat) {
+                public void setLat(double lat) {
                     this.lat = lat;
                 }
 
-                public int getLongX() {
+                public double getLongX() {
                     return longX;
                 }
 
-                public void setLongX(int longX) {
+                public void setLongX(double longX) {
                     this.longX = longX;
                 }
 
-                public int getVert() {
+                public double getVert() {
                     return vert;
                 }
 
-                public void setVert(int vert) {
+                public void setVert(double vert) {
                     this.vert = vert;
                 }
 
-                public int getYaw() {
+                public double getYaw() {
                     return yaw;
                 }
 
-                public void setYaw(int yaw) {
+                public void setYaw(double yaw) {
                     this.yaw = yaw;
                 }
             }
@@ -264,46 +264,46 @@ public class OBU_RSM {
             }
 
             public static class PosConfidenceBean {
-                private int pos;
+                private double pos;
 
-                public int getPos() {
+                public double getPos() {
                     return pos;
                 }
 
-                public void setPos(int pos) {
+                public void setPos(double pos) {
                     this.pos = pos;
                 }
             }
 
             public static class SizeBean {
-                private int length;
-                private int width;
+                private double length;
+                private double width;
 
-                public int getLength() {
+                public double getLength() {
                     return length;
                 }
 
-                public void setLength(int length) {
+                public void setLength(double length) {
                     this.length = length;
                 }
 
-                public int getWidth() {
+                public double getWidth() {
                     return width;
                 }
 
-                public void setWidth(int width) {
+                public void setWidth(double width) {
                     this.width = width;
                 }
             }
 
             public static class VehicleClassBean {
-                private int classification;
+                private double classification;
 
-                public int getClassification() {
+                public double getClassification() {
                     return classification;
                 }
 
-                public void setClassification(int classification) {
+                public void setClassification(double classification) {
                     this.classification = classification;
                 }
             }

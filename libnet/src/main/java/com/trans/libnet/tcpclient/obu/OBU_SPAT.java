@@ -23,27 +23,27 @@ public class OBU_SPAT {
     }
 
     public static class SPATBean {
-        private List<IntersectionsBean> intersections;
+        private List<IntersectionsBean> doubleersections;
 
         public List<IntersectionsBean> getIntersections() {
-            return intersections;
+            return doubleersections;
         }
 
-        public void setIntersections(List<IntersectionsBean> intersections) {
-            this.intersections = intersections;
+        public void setIntersections(List<IntersectionsBean> doubleersections) {
+            this.doubleersections = doubleersections;
         }
 
         public static class IntersectionsBean {
-            private IntersectionIdBean intersectionId;
+            private IntersectionIdBean doubleersectionId;
             private List<PhasesBean> phases;
-            private int status;
+            private double status;
 
             public IntersectionIdBean getIntersectionId() {
-                return intersectionId;
+                return doubleersectionId;
             }
 
-            public void setIntersectionId(IntersectionIdBean intersectionId) {
-                this.intersectionId = intersectionId;
+            public void setIntersectionId(IntersectionIdBean doubleersectionId) {
+                this.doubleersectionId = doubleersectionId;
             }
 
             public List<PhasesBean> getPhases() {
@@ -54,44 +54,44 @@ public class OBU_SPAT {
                 this.phases = phases;
             }
 
-            public int getStatus() {
+            public double getStatus() {
                 return status;
             }
 
-            public void setStatus(int status) {
+            public void setStatus(double status) {
                 this.status = status;
             }
 
             public static class IntersectionIdBean {
-                private int id;
-                private int region;
+                private double id;
+                private double region;
 
-                public int getId() {
+                public double getId() {
                     return id;
                 }
 
-                public void setId(int id) {
+                public void setId(double id) {
                     this.id = id;
                 }
 
-                public int getRegion() {
+                public double getRegion() {
                     return region;
                 }
 
-                public void setRegion(int region) {
+                public void setRegion(double region) {
                     this.region = region;
                 }
             }
 
             public static class PhasesBean {
-                private int id;
+                private double id;
                 private List<PhaseStatesBean> phaseStates;
 
-                public int getId() {
+                public double getId() {
                     return id;
                 }
 
-                public void setId(int id) {
+                public void setId(double id) {
                     this.id = id;
                 }
 
@@ -104,14 +104,14 @@ public class OBU_SPAT {
                 }
 
                 public static class PhaseStatesBean {
-                    private int light;
+                    private double light;
                     private TimingBean timing;
 
-                    public int getLight() {
+                    public double getLight() {
                         return light;
                     }
 
-                    public void setLight(int light) {
+                    public void setLight(double light) {
                         this.light = light;
                     }
 

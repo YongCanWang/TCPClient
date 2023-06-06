@@ -81,22 +81,22 @@ public class OBU_MAP {
             }
 
             public static class IdBean {
-                private int id;
-                private int region;
+                private double id;
+                private double region;
 
-                public int getId() {
+                public double getId() {
                     return id;
                 }
 
-                public void setId(int id) {
+                public void setId(double id) {
                     this.id = id;
                 }
 
-                public int getRegion() {
+                public double getRegion() {
                     return region;
                 }
 
-                public void setRegion(int region) {
+                public void setRegion(double region) {
                     this.region = region;
                 }
             }
@@ -125,9 +125,9 @@ public class OBU_MAP {
 
             public static class InLinksBean {
                 private List<LanesBean> lanes;
-                private int linkWidth;
+                private double linkWidth;
                 private String name;
-                private List<PointsBean> points;
+                private List<PodoublesBean> podoubles;
                 private List<SpeedLimitsBean> speedLimits;
                 private UpstreamNodeIdBean upstreamNodeId;
 
@@ -139,11 +139,11 @@ public class OBU_MAP {
                     this.lanes = lanes;
                 }
 
-                public int getLinkWidth() {
+                public double getLinkWidth() {
                     return linkWidth;
                 }
 
-                public void setLinkWidth(int linkWidth) {
+                public void setLinkWidth(double linkWidth) {
                     this.linkWidth = linkWidth;
                 }
 
@@ -155,12 +155,12 @@ public class OBU_MAP {
                     this.name = name;
                 }
 
-                public List<PointsBean> getPoints() {
-                    return points;
+                public List<PodoublesBean> getPodoubles() {
+                    return podoubles;
                 }
 
-                public void setPoints(List<PointsBean> points) {
-                    this.points = points;
+                public void setPodoubles(List<PodoublesBean> podoubles) {
+                    this.podoubles = podoubles;
                 }
 
                 public List<SpeedLimitsBean> getSpeedLimits() {
@@ -180,39 +180,39 @@ public class OBU_MAP {
                 }
 
                 public static class UpstreamNodeIdBean {
-                    private int id;
-                    private int region;
+                    private double id;
+                    private double region;
 
-                    public int getId() {
+                    public double getId() {
                         return id;
                     }
 
-                    public void setId(int id) {
+                    public void setId(double id) {
                         this.id = id;
                     }
 
-                    public int getRegion() {
+                    public double getRegion() {
                         return region;
                     }
 
-                    public void setRegion(int region) {
+                    public void setRegion(double region) {
                         this.region = region;
                     }
                 }
 
                 public static class LanesBean {
-                    private int laneID;
+                    private double laneID;
 
-                    public int getLaneID() {
+                    public double getLaneID() {
                         return laneID;
                     }
 
-                    public void setLaneID(int laneID) {
+                    public void setLaneID(double laneID) {
                         this.laneID = laneID;
                     }
                 }
 
-                public static class PointsBean {
+                public static class PodoublesBean {
                     private PosBean pos;
 
                     public PosBean getPos() {
@@ -248,7 +248,7 @@ public class OBU_MAP {
 
                 public static class SpeedLimitsBean {
                     private double speed;
-                    private int type;
+                    private double type;
 
                     public double getSpeed() {
                         return speed;
@@ -258,11 +258,11 @@ public class OBU_MAP {
                         this.speed = speed;
                     }
 
-                    public int getType() {
+                    public double getType() {
                         return type;
                     }
 
-                    public void setType(int type) {
+                    public void setType(double type) {
                         this.type = type;
                     }
                 }

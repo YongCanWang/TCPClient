@@ -24,7 +24,7 @@ public class OBU_TPM {
         private double heading;
         private PosBean pos;
         private PosConfidenceBean posConfidence;
-        private int speed;
+        private double speed;
         private double utcTime;
 
         public double getHeading() {
@@ -51,11 +51,11 @@ public class OBU_TPM {
             this.posConfidence = posConfidence;
         }
 
-        public int getSpeed() {
+        public double getSpeed() {
             return speed;
         }
 
-        public void setSpeed(int speed) {
+        public void setSpeed(double speed) {
             this.speed = speed;
         }
 
@@ -99,22 +99,22 @@ public class OBU_TPM {
         }
 
         public static class PosConfidenceBean {
-            private int elevation;
-            private int pos;
+            private double elevation;
+            private double pos;
 
-            public int getElevation() {
+            public double getElevation() {
                 return elevation;
             }
 
-            public void setElevation(int elevation) {
+            public void setElevation(double elevation) {
                 this.elevation = elevation;
             }
 
-            public int getPos() {
+            public double getPos() {
                 return pos;
             }
 
-            public void setPos(int pos) {
+            public void setPos(double pos) {
                 this.pos = pos;
             }
         }

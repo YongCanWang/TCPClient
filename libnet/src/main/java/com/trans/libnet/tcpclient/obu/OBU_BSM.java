@@ -24,15 +24,15 @@ public class OBU_BSM {
         private AccelSetBean accelSet;
         private BrakesBean brakes;
         private double heading;
-        private int hostFlag;
+        private double hostFlag;
         private String id;
-        private int msg_id;
-        private int pcert_event;
+        private double msg_id;
+        private double pcert_event;
         private PosBean pos;
         private PosConfidenceBean posConfidence;
         private SizeBean size;
-        private int speed;
-        private int transmission;
+        private double speed;
+        private double transmission;
         private double utcTime;
         private VehicleClassBean vehicleClass;
 
@@ -60,11 +60,11 @@ public class OBU_BSM {
             this.heading = heading;
         }
 
-        public int getHostFlag() {
+        public double getHostFlag() {
             return hostFlag;
         }
 
-        public void setHostFlag(int hostFlag) {
+        public void setHostFlag(double hostFlag) {
             this.hostFlag = hostFlag;
         }
 
@@ -76,19 +76,19 @@ public class OBU_BSM {
             this.id = id;
         }
 
-        public int getMsg_id() {
+        public double getMsg_id() {
             return msg_id;
         }
 
-        public void setMsg_id(int msg_id) {
+        public void setMsg_id(double msg_id) {
             this.msg_id = msg_id;
         }
 
-        public int getPcert_event() {
+        public double getPcert_event() {
             return pcert_event;
         }
 
-        public void setPcert_event(int pcert_event) {
+        public void setPcert_event(double pcert_event) {
             this.pcert_event = pcert_event;
         }
 
@@ -116,19 +116,19 @@ public class OBU_BSM {
             this.size = size;
         }
 
-        public int getSpeed() {
+        public double getSpeed() {
             return speed;
         }
 
-        public void setSpeed(int speed) {
+        public void setSpeed(double speed) {
             this.speed = speed;
         }
 
-        public int getTransmission() {
+        public double getTransmission() {
             return transmission;
         }
 
-        public void setTransmission(int transmission) {
+        public void setTransmission(double transmission) {
             this.transmission = transmission;
         }
 
@@ -186,55 +186,55 @@ public class OBU_BSM {
         }
 
         public static class PosConfidenceBean {
-            private int elevation;
-            private int pos;
+            private double elevation;
+            private double pos;
 
-            public int getElevation() {
+            public double getElevation() {
                 return elevation;
             }
 
-            public void setElevation(int elevation) {
+            public void setElevation(double elevation) {
                 this.elevation = elevation;
             }
 
-            public int getPos() {
+            public double getPos() {
                 return pos;
             }
 
-            public void setPos(int pos) {
+            public void setPos(double pos) {
                 this.pos = pos;
             }
         }
 
         public static class SizeBean {
-            private int length;
-            private int width;
+            private double length;
+            private double width;
 
-            public int getLength() {
+            public double getLength() {
                 return length;
             }
 
-            public void setLength(int length) {
+            public void setLength(double length) {
                 this.length = length;
             }
 
-            public int getWidth() {
+            public double getWidth() {
                 return width;
             }
 
-            public void setWidth(int width) {
+            public void setWidth(double width) {
                 this.width = width;
             }
         }
 
         public static class VehicleClassBean {
-            private int classification;
+            private double classification;
 
-            public int getClassification() {
+            public double getClassification() {
                 return classification;
             }
 
-            public void setClassification(int classification) {
+            public void setClassification(double classification) {
                 this.classification = classification;
             }
         }
