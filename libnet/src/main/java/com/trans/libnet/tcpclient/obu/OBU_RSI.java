@@ -102,16 +102,16 @@ public class OBU_RSI {
 
         public static class RtesBean {
             private String description;
-            private int eventConfidence;
-            private int eventSource;
-            private int eventType;
-            private int priority;
+            private double eventConfidence;
+            private double eventSource;
+            private double eventType;
+            private double priority;
             private List<ReferenceLinksBean> referenceLinks;
             private List<ReferencePathsBean> referencePaths;
-            private int rteId;
+            private double rteId;
             private TimeDetailsBean timeDetails;
             private EventPosBean eventPos;
-            private int eventRadius;
+            private double eventRadius;
 
             public String getDescription() {
                 return description;
@@ -121,35 +121,35 @@ public class OBU_RSI {
                 this.description = description;
             }
 
-            public int getEventConfidence() {
+            public double getEventConfidence() {
                 return eventConfidence;
             }
 
-            public void setEventConfidence(int eventConfidence) {
+            public void setEventConfidence(double eventConfidence) {
                 this.eventConfidence = eventConfidence;
             }
 
-            public int getEventSource() {
+            public double getEventSource() {
                 return eventSource;
             }
 
-            public void setEventSource(int eventSource) {
+            public void setEventSource(double eventSource) {
                 this.eventSource = eventSource;
             }
 
-            public int getEventType() {
+            public double getEventType() {
                 return eventType;
             }
 
-            public void setEventType(int eventType) {
+            public void setEventType(double eventType) {
                 this.eventType = eventType;
             }
 
-            public int getPriority() {
+            public double getPriority() {
                 return priority;
             }
 
-            public void setPriority(int priority) {
+            public void setPriority(double priority) {
                 this.priority = priority;
             }
 
@@ -169,11 +169,11 @@ public class OBU_RSI {
                 this.referencePaths = referencePaths;
             }
 
-            public int getRteId() {
+            public double getRteId() {
                 return rteId;
             }
 
-            public void setRteId(int rteId) {
+            public void setRteId(double rteId) {
                 this.rteId = rteId;
             }
 
@@ -193,40 +193,40 @@ public class OBU_RSI {
                 this.eventPos = eventPos;
             }
 
-            public int getEventRadius() {
+            public double getEventRadius() {
                 return eventRadius;
             }
 
-            public void setEventRadius(int eventRadius) {
+            public void setEventRadius(double eventRadius) {
                 this.eventRadius = eventRadius;
             }
 
             public static class TimeDetailsBean {
-                private int endTime;
-                private int endTimeConfidence;
-                private int startTime;
+                private double endTime;
+                private double endTimeConfidence;
+                private double startTime;
 
-                public int getEndTime() {
+                public double getEndTime() {
                     return endTime;
                 }
 
-                public void setEndTime(int endTime) {
+                public void setEndTime(double endTime) {
                     this.endTime = endTime;
                 }
 
-                public int getEndTimeConfidence() {
+                public double getEndTimeConfidence() {
                     return endTimeConfidence;
                 }
 
-                public void setEndTimeConfidence(int endTimeConfidence) {
+                public void setEndTimeConfidence(double endTimeConfidence) {
                     this.endTimeConfidence = endTimeConfidence;
                 }
 
-                public int getStartTime() {
+                public double getStartTime() {
                     return startTime;
                 }
 
-                public void setStartTime(int startTime) {
+                public void setStartTime(double startTime) {
                     this.startTime = startTime;
                 }
             }
@@ -264,7 +264,7 @@ public class OBU_RSI {
 
             public static class ReferenceLinksBean {
                 private DownstreamNodeIdBean downstreamNodeId;
-                private int referenceLanes;
+                private double referenceLanes;
                 private UpstreamNodeIdBean upstreamNodeId;
 
                 public DownstreamNodeIdBean getDownstreamNodeId() {
@@ -275,11 +275,11 @@ public class OBU_RSI {
                     this.downstreamNodeId = downstreamNodeId;
                 }
 
-                public int getReferenceLanes() {
+                public double getReferenceLanes() {
                     return referenceLanes;
                 }
 
-                public void setReferenceLanes(int referenceLanes) {
+                public void setReferenceLanes(double referenceLanes) {
                     this.referenceLanes = referenceLanes;
                 }
 
@@ -292,43 +292,43 @@ public class OBU_RSI {
                 }
 
                 public static class DownstreamNodeIdBean {
-                    private int id;
-                    private int region;
+                    private double id;
+                    private double region;
 
-                    public int getId() {
+                    public double getId() {
                         return id;
                     }
 
-                    public void setId(int id) {
+                    public void setId(double id) {
                         this.id = id;
                     }
 
-                    public int getRegion() {
+                    public double getRegion() {
                         return region;
                     }
 
-                    public void setRegion(int region) {
+                    public void setRegion(double region) {
                         this.region = region;
                     }
                 }
 
                 public static class UpstreamNodeIdBean {
-                    private int id;
-                    private int region;
+                    private double id;
+                    private double region;
 
-                    public int getId() {
+                    public double getId() {
                         return id;
                     }
 
-                    public void setId(int id) {
+                    public void setId(double id) {
                         this.id = id;
                     }
 
-                    public int getRegion() {
+                    public double getRegion() {
                         return region;
                     }
 
-                    public void setRegion(int region) {
+                    public void setRegion(double region) {
                         this.region = region;
                     }
                 }
@@ -336,7 +336,7 @@ public class OBU_RSI {
 
             public static class ReferencePathsBean {
                 private List<ActivePathBean> activePath;
-                private int pathRadius;
+                private double pathRadius;
 
                 public List<ActivePathBean> getActivePath() {
                     return activePath;
@@ -346,11 +346,11 @@ public class OBU_RSI {
                     this.activePath = activePath;
                 }
 
-                public int getPathRadius() {
+                public double getPathRadius() {
                     return pathRadius;
                 }
 
-                public void setPathRadius(int pathRadius) {
+                public void setPathRadius(double pathRadius) {
                     this.pathRadius = pathRadius;
                 }
 
@@ -380,12 +380,12 @@ public class OBU_RSI {
 
         public static class RtssBean {
             private String description;
-            private int priority;
+            private double priority;
             private List<ReferenceLinksBean> referenceLinks;
             private List<ReferencePathsBean> referencePaths;
-            private int rtsId;
+            private double rtsId;
             private SignPosBean signPos;
-            private int signType;
+            private double signType;
             private TimeDetailsBean timeDetails;
 
             public String getDescription() {
@@ -396,11 +396,11 @@ public class OBU_RSI {
                 this.description = description;
             }
 
-            public int getPriority() {
+            public double getPriority() {
                 return priority;
             }
 
-            public void setPriority(int priority) {
+            public void setPriority(double priority) {
                 this.priority = priority;
             }
 
@@ -420,11 +420,11 @@ public class OBU_RSI {
                 this.referencePaths = referencePaths;
             }
 
-            public int getRtsId() {
+            public double getRtsId() {
                 return rtsId;
             }
 
-            public void setRtsId(int rtsId) {
+            public void setRtsId(double rtsId) {
                 this.rtsId = rtsId;
             }
 
@@ -436,11 +436,11 @@ public class OBU_RSI {
                 this.signPos = signPos;
             }
 
-            public int getSignType() {
+            public double getSignType() {
                 return signType;
             }
 
-            public void setSignType(int signType) {
+            public void setSignType(double signType) {
                 this.signType = signType;
             }
 
@@ -484,38 +484,38 @@ public class OBU_RSI {
             }
 
             public static class TimeDetailsBean {
-                private int endTime;
-                private int endTimeConfidence;
-                private int startTime;
+                private double endTime;
+                private double endTimeConfidence;
+                private double startTime;
 
-                public int getEndTime() {
+                public double getEndTime() {
                     return endTime;
                 }
 
-                public void setEndTime(int endTime) {
+                public void setEndTime(double endTime) {
                     this.endTime = endTime;
                 }
 
-                public int getEndTimeConfidence() {
+                public double getEndTimeConfidence() {
                     return endTimeConfidence;
                 }
 
-                public void setEndTimeConfidence(int endTimeConfidence) {
+                public void setEndTimeConfidence(double endTimeConfidence) {
                     this.endTimeConfidence = endTimeConfidence;
                 }
 
-                public int getStartTime() {
+                public double getStartTime() {
                     return startTime;
                 }
 
-                public void setStartTime(int startTime) {
+                public void setStartTime(double startTime) {
                     this.startTime = startTime;
                 }
             }
 
             public static class ReferenceLinksBean {
                 private DownstreamNodeIdBean downstreamNodeId;
-                private int referenceLanes;
+                private double referenceLanes;
                 private UpstreamNodeIdBean upstreamNodeId;
 
                 public DownstreamNodeIdBean getDownstreamNodeId() {
@@ -526,11 +526,11 @@ public class OBU_RSI {
                     this.downstreamNodeId = downstreamNodeId;
                 }
 
-                public int getReferenceLanes() {
+                public double getReferenceLanes() {
                     return referenceLanes;
                 }
 
-                public void setReferenceLanes(int referenceLanes) {
+                public void setReferenceLanes(double referenceLanes) {
                     this.referenceLanes = referenceLanes;
                 }
 
@@ -543,43 +543,43 @@ public class OBU_RSI {
                 }
 
                 public static class DownstreamNodeIdBean {
-                    private int id;
-                    private int region;
+                    private double id;
+                    private double region;
 
-                    public int getId() {
+                    public double getId() {
                         return id;
                     }
 
-                    public void setId(int id) {
+                    public void setId(double id) {
                         this.id = id;
                     }
 
-                    public int getRegion() {
+                    public double getRegion() {
                         return region;
                     }
 
-                    public void setRegion(int region) {
+                    public void setRegion(double region) {
                         this.region = region;
                     }
                 }
 
                 public static class UpstreamNodeIdBean {
-                    private int id;
-                    private int region;
+                    private double id;
+                    private double region;
 
-                    public int getId() {
+                    public double getId() {
                         return id;
                     }
 
-                    public void setId(int id) {
+                    public void setId(double id) {
                         this.id = id;
                     }
 
-                    public int getRegion() {
+                    public double getRegion() {
                         return region;
                     }
 
-                    public void setRegion(int region) {
+                    public void setRegion(double region) {
                         this.region = region;
                     }
                 }
@@ -587,7 +587,7 @@ public class OBU_RSI {
 
             public static class ReferencePathsBean {
                 private List<ActivePathBean> activePath;
-                private int pathRadius;
+                private double pathRadius;
 
                 public List<ActivePathBean> getActivePath() {
                     return activePath;
@@ -597,11 +597,11 @@ public class OBU_RSI {
                     this.activePath = activePath;
                 }
 
-                public int getPathRadius() {
+                public double getPathRadius() {
                     return pathRadius;
                 }
 
-                public void setPathRadius(int pathRadius) {
+                public void setPathRadius(double pathRadius) {
                     this.pathRadius = pathRadius;
                 }
 

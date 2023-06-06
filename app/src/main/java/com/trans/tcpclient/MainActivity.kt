@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun receive(data: String?) {
-//                Log.e(TAG, "收到服务器数据:$data")
+                Log.e(TAG, "收到服务器数据:$data")
                 when (SocketClient.getOBUType(data)) {
                     Constants.HEART -> {
                         val heart = SocketClient.gson.fromJson(data, OBU_HEART::class.java)
