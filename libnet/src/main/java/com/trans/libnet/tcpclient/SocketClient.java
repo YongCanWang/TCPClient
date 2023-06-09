@@ -44,6 +44,7 @@ public class SocketClient {
     //    private static String hostname = "172.19.250.13"; // 网络调试助手IP
     //    private static int port = 12345; // 手机服务器端口
     private static int port = 7130; // obu设备端口
+    private static String endSymbol = "\0"; // 数据结束符
     private static Socket socket;
     public static OnServiceDataListener onServiceDataListener;
     public final static Gson gson = new Gson();
@@ -59,15 +60,15 @@ public class SocketClient {
                 Log.e(TAG, "start");
                 SocketAddress socAddress = new InetSocketAddress(hostname, port);
                 Log.e(TAG, "启动客户端:正在与服务器建立连接......");
-                socket.connect(socAddress, 5000);//超时3秒
-                Log.e(TAG, "连接服务器成功（超时值3秒）");  // 连接服务器成功，并进入阻塞状态...
+                socket.connect(socAddress, 5000);//超时5秒
+                Log.e(TAG, "连接服务器成功（超时值5秒）");  // 连接服务器成功，并进入阻塞状态...
                 handler.sendEmptyMessage(10001);
                 // 监听服务端
                 getServiceData();
                 // 发送数据到客户端
 //                sendACKData(); // 代码不执行
             } catch (Exception e) {
-                Log.e(TAG, "链接错误:" + e);
+                Log.e(TAG, "连接服务器错误:" + e);
                 e.printStackTrace();
             }
         }
@@ -131,16 +132,16 @@ public class SocketClient {
     }
 
     /**
-     * 通过结束符 /n
+     * 通过结束符 /n 处理数据的分包、粘包
      *
      * @param buffer
      * @param len
      */
     private static void handlerData2(byte[] buffer, int len) {
         String data = new String(buffer, 0, len);
-//        Log.e(TAG, "收到服务端数据:" + data);
-        boolean contains = data.contains("\0");
-        String[] split = data.split("\0");
+        Log.e(TAG, "收到服务端数据:" + data);
+        boolean contains = data.contains(endSymbol);
+        String[] split = data.split(endSymbol);
         if (contains) {
             if (split.length == 0) { // 分包处理
                 stringBuilder.append(data.trim());
@@ -192,7 +193,7 @@ public class SocketClient {
 
                 // 处理最后一条数据
                 // 最后一条数据是否出现粘包
-                if (String.valueOf(data.charAt(data.length() - 1)).equals("\0")) {  // 完整数据
+                if (String.valueOf(data.charAt(data.length() - 1)).equals(endSymbol)) {  // 完整数据
                     String dataJson = split[split.length - 1].trim();
                     if (isJson(dataJson)) {
                         handler.sendMessage(handler.obtainMessage(10002, dataJson));
@@ -211,7 +212,7 @@ public class SocketClient {
 
 
     public static boolean isSubPackage(String data) {
-        return !String.valueOf(data.charAt(data.length())).equals("\0");
+        return !String.valueOf(data.charAt(data.length())).equals(endSymbol);
     }
 
 
@@ -371,6 +372,8 @@ public class SocketClient {
 //            JSONObject base = jsonObject.getJSONObject("base");
             Iterator<String> keys = jsonObject.keys();
             String next = keys.next();
+            jsonObject = null;
+            keys = null;
             Log.e(TAG, "getOBUType: " + next); // RSM
 
 //            JsonParser jsonParser = new JsonParser();
@@ -395,7 +398,7 @@ public class SocketClient {
 
             return next;
         } catch (JSONException e) {
-            Log.e(TAG, "getOBUType: Exception" + e);
+            Log.e(TAG, "getOBUType:获取OBU数据类型错误 ---> Exception" + e);
             throw new RuntimeException(e);
         }
 

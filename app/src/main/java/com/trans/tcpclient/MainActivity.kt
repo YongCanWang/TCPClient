@@ -14,6 +14,7 @@ import com.trans.libnet.tcpclient.obu.OBU_MAP
 import com.trans.libnet.tcpclient.obu.OBU_RSI
 import com.trans.libnet.tcpclient.obu.OBU_RSM
 import com.trans.libnet.tcpclient.obu.OBU_SPAT
+import com.trans.libnet.tcpclient.obu.OBU_TM
 import com.trans.libnet.tcpclient.obu.OBU_TPM
 import com.trans.libnet.tcpclient.obu.OBU_VIM
 import com.trans.libnet.udpclinet.DatagramSocketClient
@@ -84,6 +85,12 @@ class MainActivity : AppCompatActivity() {
                         val vim = SocketClient.gson.fromJson(data, OBU_VIM::class.java)
                         Log.e(TAG, "receive: VIM:$vim")
                     }
+
+                    Constants.TM -> {
+                        val vim = SocketClient.gson.fromJson(data, OBU_TM::class.java)
+                        Log.e(TAG, "receive: VIM:$vim")
+                    }
+
                 }
             }
 

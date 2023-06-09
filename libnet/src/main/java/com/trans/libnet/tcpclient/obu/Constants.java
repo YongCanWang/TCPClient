@@ -14,4 +14,6 @@ public class Constants {
     public static final String SPAT = "SPAT";
     public static final String TPM = "TPM";
     public static final String VIM = "VIM";
+
+    public static final String TM = "TM";
 }
