@@ -6,10 +6,11 @@ import java.util.List;
 
 /**
  * @author Tom灿
- * @description:
+ * @description: 红路灯消息
  * @date :2023/6/5 9:05
  */
 public class OBU_SPAT {
+
 
     @SerializedName("SPAT")
     private SPATBean sPAT;
@@ -23,27 +24,83 @@ public class OBU_SPAT {
     }
 
     public static class SPATBean {
-        private List<IntersectionsBean> doubleersections;
+        private int msgCnt;
+        private String msgType;
+        private int timestamp;
+        private String uuid;
+        private List<IntersectionsBean> intersections;
 
-        public List<IntersectionsBean> getIntersections() {
-            return doubleersections;
+        public int getMsgCnt() {
+            return msgCnt;
         }
 
-        public void setIntersections(List<IntersectionsBean> doubleersections) {
-            this.doubleersections = doubleersections;
+        public void setMsgCnt(int msgCnt) {
+            this.msgCnt = msgCnt;
+        }
+
+        public String getMsgType() {
+            return msgType;
+        }
+
+        public void setMsgType(String msgType) {
+            this.msgType = msgType;
+        }
+
+        public int getTimestamp() {
+            return timestamp;
+        }
+
+        public void setTimestamp(int timestamp) {
+            this.timestamp = timestamp;
+        }
+
+        public String getUuid() {
+            return uuid;
+        }
+
+        public void setUuid(String uuid) {
+            this.uuid = uuid;
+        }
+
+        public List<IntersectionsBean> getIntersections() {
+            return intersections;
+        }
+
+        public void setIntersections(List<IntersectionsBean> intersections) {
+            this.intersections = intersections;
         }
 
         public static class IntersectionsBean {
-            private IntersectionIdBean doubleersectionId;
+            private String intersectionId;
+            private int intersectionTimestamp;
+            private int nodeId;
             private List<PhasesBean> phases;
-            private double status;
+            private int regionId;
+            private int status;
+            private int timeConfidence;
 
-            public IntersectionIdBean getIntersectionId() {
-                return doubleersectionId;
+            public String getIntersectionId() {
+                return intersectionId;
             }
 
-            public void setIntersectionId(IntersectionIdBean doubleersectionId) {
-                this.doubleersectionId = doubleersectionId;
+            public void setIntersectionId(String intersectionId) {
+                this.intersectionId = intersectionId;
+            }
+
+            public int getIntersectionTimestamp() {
+                return intersectionTimestamp;
+            }
+
+            public void setIntersectionTimestamp(int intersectionTimestamp) {
+                this.intersectionTimestamp = intersectionTimestamp;
+            }
+
+            public int getNodeId() {
+                return nodeId;
+            }
+
+            public void setNodeId(int nodeId) {
+                this.nodeId = nodeId;
             }
 
             public List<PhasesBean> getPhases() {
@@ -54,46 +111,33 @@ public class OBU_SPAT {
                 this.phases = phases;
             }
 
-            public double getStatus() {
+            public int getRegionId() {
+                return regionId;
+            }
+
+            public void setRegionId(int regionId) {
+                this.regionId = regionId;
+            }
+
+            public int getStatus() {
                 return status;
             }
 
-            public void setStatus(double status) {
+            public void setStatus(int status) {
                 this.status = status;
             }
 
-            public static class IntersectionIdBean {
-                private double id;
-                private double region;
+            public int getTimeConfidence() {
+                return timeConfidence;
+            }
 
-                public double getId() {
-                    return id;
-                }
-
-                public void setId(double id) {
-                    this.id = id;
-                }
-
-                public double getRegion() {
-                    return region;
-                }
-
-                public void setRegion(double region) {
-                    this.region = region;
-                }
+            public void setTimeConfidence(int timeConfidence) {
+                this.timeConfidence = timeConfidence;
             }
 
             public static class PhasesBean {
-                private double id;
                 private List<PhaseStatesBean> phaseStates;
-
-                public double getId() {
-                    return id;
-                }
-
-                public void setId(double id) {
-                    this.id = id;
-                }
+                private int phasesId;
 
                 public List<PhaseStatesBean> getPhaseStates() {
                     return phaseStates;
@@ -103,57 +147,113 @@ public class OBU_SPAT {
                     this.phaseStates = phaseStates;
                 }
 
-                public static class PhaseStatesBean {
-                    private double light;
-                    private TimingBean timing;
+                public int getPhasesId() {
+                    return phasesId;
+                }
 
-                    public double getLight() {
+                public void setPhasesId(int phasesId) {
+                    this.phasesId = phasesId;
+                }
+
+                public static class PhaseStatesBean {
+                    private int light;
+                    private int likelyEndTime;
+                    private int likelyEndUTCTime;
+                    private int maxEndUTCTime;
+                    private int minEndUTCTime;
+                    private int nextDuration;
+                    private int nextEndUTCTime;
+                    private int nextStartUTCTime;
+                    private int startTime;
+                    private int startUTCTime;
+                    private int timeChangeDetails;
+
+                    public int getLight() {
                         return light;
                     }
 
-                    public void setLight(double light) {
+                    public void setLight(int light) {
                         this.light = light;
                     }
 
-                    public TimingBean getTiming() {
-                        return timing;
+                    public int getLikelyEndTime() {
+                        return likelyEndTime;
                     }
 
-                    public void setTiming(TimingBean timing) {
-                        this.timing = timing;
+                    public void setLikelyEndTime(int likelyEndTime) {
+                        this.likelyEndTime = likelyEndTime;
                     }
 
-                    public static class TimingBean {
-                        private CountingBean counting;
+                    public int getLikelyEndUTCTime() {
+                        return likelyEndUTCTime;
+                    }
 
-                        public CountingBean getCounting() {
-                            return counting;
-                        }
+                    public void setLikelyEndUTCTime(int likelyEndUTCTime) {
+                        this.likelyEndUTCTime = likelyEndUTCTime;
+                    }
 
-                        public void setCounting(CountingBean counting) {
-                            this.counting = counting;
-                        }
+                    public int getMaxEndUTCTime() {
+                        return maxEndUTCTime;
+                    }
 
-                        public static class CountingBean {
-                            private double likelyEndTime;
-                            private double startTime;
+                    public void setMaxEndUTCTime(int maxEndUTCTime) {
+                        this.maxEndUTCTime = maxEndUTCTime;
+                    }
 
-                            public double getLikelyEndTime() {
-                                return likelyEndTime;
-                            }
+                    public int getMinEndUTCTime() {
+                        return minEndUTCTime;
+                    }
 
-                            public void setLikelyEndTime(double likelyEndTime) {
-                                this.likelyEndTime = likelyEndTime;
-                            }
+                    public void setMinEndUTCTime(int minEndUTCTime) {
+                        this.minEndUTCTime = minEndUTCTime;
+                    }
 
-                            public double getStartTime() {
-                                return startTime;
-                            }
+                    public int getNextDuration() {
+                        return nextDuration;
+                    }
 
-                            public void setStartTime(double startTime) {
-                                this.startTime = startTime;
-                            }
-                        }
+                    public void setNextDuration(int nextDuration) {
+                        this.nextDuration = nextDuration;
+                    }
+
+                    public int getNextEndUTCTime() {
+                        return nextEndUTCTime;
+                    }
+
+                    public void setNextEndUTCTime(int nextEndUTCTime) {
+                        this.nextEndUTCTime = nextEndUTCTime;
+                    }
+
+                    public int getNextStartUTCTime() {
+                        return nextStartUTCTime;
+                    }
+
+                    public void setNextStartUTCTime(int nextStartUTCTime) {
+                        this.nextStartUTCTime = nextStartUTCTime;
+                    }
+
+                    public int getStartTime() {
+                        return startTime;
+                    }
+
+                    public void setStartTime(int startTime) {
+                        this.startTime = startTime;
+                    }
+
+                    public int getStartUTCTime() {
+                        return startUTCTime;
+                    }
+
+                    public void setStartUTCTime(int startUTCTime) {
+                        this.startUTCTime = startUTCTime;
+                    }
+
+                    public int getTimeChangeDetails() {
+                        return timeChangeDetails;
+                    }
+
+                    public void setTimeChangeDetails(int timeChangeDetails) {
+                        this.timeChangeDetails = timeChangeDetails;
                     }
                 }
             }

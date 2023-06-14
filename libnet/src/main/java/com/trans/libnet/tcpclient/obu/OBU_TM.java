@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * @author Tom灿
- * @description:
+ * @description: 预警消息
  * @date :2023/6/9 10:09
  */
 public class OBU_TM {

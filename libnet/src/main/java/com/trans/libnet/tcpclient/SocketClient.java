@@ -38,19 +38,21 @@ import java.util.Iterator;
  * @date :2023/5/25 9:24
  */
 public class SocketClient {
-    private static String TAG = "SocketClient";
+    private static final String TAG = "SocketClient";
     //        private static String hostname = "172.19.250.161"; // 手机服务器IP
     private static String hostname = "192.168.10.123"; // obu设备IP
     //    private static String hostname = "172.19.250.13"; // 网络调试助手IP
     //    private static int port = 12345; // 手机服务器端口
     private static int port = 7130; // obu设备端口
     private static String endSymbol = "\0"; // 数据结束符
+    private static int timeout = 5000; // 连接超时时间
     private static Socket socket;
     public static OnServiceDataListener onServiceDataListener;
-    public final static Gson gson = new Gson();
+    public static final Gson gson = new Gson();
     private static boolean isSubPackage = false;
-    private static StringBuilder stringBuilder = new StringBuilder(); // 高效处理分包数据
-    private static Runnable net = new Runnable() {
+    private static final StringBuilder stringBuilder = new StringBuilder(); // 高效处理分包数据
+    private static Thread thread;
+    private static final Runnable net = new Runnable() {
         @Override
         public void run() {
             try {
@@ -59,9 +61,9 @@ public class SocketClient {
                 socket = new Socket();
                 Log.e(TAG, "start");
                 SocketAddress socAddress = new InetSocketAddress(hostname, port);
-                Log.e(TAG, "启动客户端:正在与服务器建立连接......");
-                socket.connect(socAddress, 5000);//超时5秒
-                Log.e(TAG, "连接服务器成功（超时值5秒）");  // 连接服务器成功，并进入阻塞状态...
+                Log.e(TAG, "启动客户端:正在与服务器(" + hostname + ")建立连接......");
+                socket.connect(socAddress, timeout);//超时5秒
+                Log.e(TAG, "连接服务器成功(超时值" + timeout + "ms)");  // 连接服务器成功，并进入阻塞状态...
                 handler.sendEmptyMessage(10001);
                 // 监听服务端
                 getServiceData();
@@ -80,6 +82,7 @@ public class SocketClient {
     private static void getServiceData() {
         InputStream inputStream = null;
         try {
+            Log.e(TAG, "监听服务器(" + hostname + "):" + port + "端口......");
 //            PrintWriter pw = new PrintWriter(socket.getOutputStream());
             inputStream = socket.getInputStream();
             byte[] buffer = new byte[1024 * 2];
@@ -141,8 +144,8 @@ public class SocketClient {
         String data = new String(buffer, 0, len);
         Log.e(TAG, "收到服务端数据:" + data);
         boolean contains = data.contains(endSymbol);
-        String[] split = data.split(endSymbol);
         if (contains) {
+            String[] split = data.split(endSymbol);
             if (split.length == 0) { // 分包处理
                 stringBuilder.append(data.trim());
             }
@@ -266,7 +269,7 @@ public class SocketClient {
 
 
     @SuppressLint("HandlerLeak")
-    private static Handler handler = new Handler() {
+    private static final Handler handler = new Handler() {
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
@@ -293,7 +296,14 @@ public class SocketClient {
     };
 
     public static void connect() {
-        new Thread(SocketClient.net).start();
+        if (thread == null) {
+            thread = new Thread(SocketClient.net);
+            thread.setPriority(10);
+            thread.start();
+        } else {
+            if (!thread.isAlive()) thread.start();
+        }
+
     }
 
 
@@ -398,10 +408,10 @@ public class SocketClient {
 
             return next;
         } catch (JSONException e) {
-            Log.e(TAG, "getOBUType:获取OBU数据类型错误 ---> Exception" + e);
-            throw new RuntimeException(e);
+            Log.e(TAG, "getOBUType:获取OBU数据类型错误 ---> JSONException:" + e);
+            e.printStackTrace();
         }
-
+        return "";
     }
 
     private static final JsonParser jsonParser = new JsonParser();

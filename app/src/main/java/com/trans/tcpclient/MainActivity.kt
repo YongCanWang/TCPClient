@@ -87,8 +87,8 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     Constants.TM -> {
-                        val vim = SocketClient.gson.fromJson(data, OBU_TM::class.java)
-                        Log.e(TAG, "receive: VIM:$vim")
+                        val tm = SocketClient.gson.fromJson(data, OBU_TM::class.java)
+                        Log.e(TAG, "receive: TM:$tm")
                     }
 
                 }
