@@ -11,9 +11,10 @@ public class Constants {
     public static final String MAP = "MAP";
     public static final String RSI = "RSI";
     public static final String RSM = "RSM";
+
+    public static final String SSTM = "SSTM";
     public static final String SPAT = "SPAT";
     public static final String TPM = "TPM";
     public static final String VIM = "VIM";
-
     public static final String TM = "TM";
 }

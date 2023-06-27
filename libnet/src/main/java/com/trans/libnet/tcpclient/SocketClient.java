@@ -53,7 +53,7 @@ public class SocketClient {
     private static final StringBuilder stringBuilder = new StringBuilder(); // 高效处理分包数据
     private static Thread thread;
     private static long lastTime = System.currentTimeMillis();
-    private static int hz = 10; // 最低接收处理数据的频率，小于该频率的数据，直接丢弃
+    private static int hz = 10; //ms 最低接收处理数据的频率，小于该频率的数据，直接丢弃
     private static final Runnable net = new Runnable() {
         @Override
         public void run() {
