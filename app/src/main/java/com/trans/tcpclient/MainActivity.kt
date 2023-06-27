@@ -102,6 +102,7 @@ class MainActivity : AppCompatActivity() {
                 Log.e(TAG, "接受数据错误:$e")
             }
         }
+        SocketClient.setHz(30)
         SocketClient.connect()
     }
 

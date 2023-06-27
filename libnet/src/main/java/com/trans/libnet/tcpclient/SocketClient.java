@@ -52,6 +52,8 @@ public class SocketClient {
     private static boolean isSubPackage = false;
     private static final StringBuilder stringBuilder = new StringBuilder(); // 高效处理分包数据
     private static Thread thread;
+    private static long lastTime = System.currentTimeMillis();
+    private static int hz = 10; // 最低接收处理数据的频率，小于该频率的数据，直接丢弃
     private static final Runnable net = new Runnable() {
         @Override
         public void run() {
@@ -79,7 +81,7 @@ public class SocketClient {
     /**
      * 监听服务端请求
      */
-    private static void getServiceData() {
+    private static synchronized void getServiceData() {
         InputStream inputStream = null;
         try {
             Log.e(TAG, "监听服务器(" + hostname + "):" + port + "端口......");
@@ -89,7 +91,13 @@ public class SocketClient {
             int len = -1;
 //            String datas = "";
             while ((len = inputStream.read(buffer)) != -1) {
+                if (System.currentTimeMillis() - lastTime < hz
+                        && stringBuilder.length() == 0) {
+                    Log.e(TAG, "帧率过快(" + hz + "),数据被过滤");
+                    continue;
+                }
                 handlerData2(buffer, len);
+                lastTime = System.currentTimeMillis();
             }
 //            Log.e(TAG, "datas:" + datas);
             Log.e(TAG, "客户端-服务器: 断开连接");
@@ -140,7 +148,7 @@ public class SocketClient {
      * @param buffer
      * @param len
      */
-    private static void handlerData2(byte[] buffer, int len) {
+    private static synchronized void handlerData2(byte[] buffer, int len) {
         String data = new String(buffer, 0, len);
         Log.e(TAG, "收到服务端数据:" + data);
         boolean contains = data.contains(endSymbol);
@@ -164,15 +172,13 @@ public class SocketClient {
             if (split.length >= 2) {  // 分包处理 + 分包中带粘包
                 // 处理第一条数据
                 if (stringBuilder.length() == 0) {  // 完整数据
-                    if (split.length != 0) {
-                        String dataJson = split[0].trim();
-                        if (isJson(dataJson)) {
-                            handler.sendMessage(handler.obtainMessage(10002, dataJson));
-                        } else {
-                            Log.e(TAG, "handlerData2: 数据丢失:" + dataJson.length());
-                        }
+                    String dataJson = split[0].trim();
+                    if (isJson(dataJson)) {
                         handler.sendMessage(handler.obtainMessage(10002, dataJson));
+                    } else {
+                        Log.e(TAG, "handlerData2: 数据丢失:" + dataJson.length());
                     }
+                    handler.sendMessage(handler.obtainMessage(10002, dataJson));
                 } else {
                     stringBuilder.append(split[0]); // 被分包
                     String dataJson = stringBuilder.toString().trim();
@@ -437,6 +443,10 @@ public class SocketClient {
 
     public static void setPort(int port) {
         SocketClient.port = port;
+    }
+
+    public static void setHz(int hz) {
+        SocketClient.hz = hz;
     }
 
 }
