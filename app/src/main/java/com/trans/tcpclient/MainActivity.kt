@@ -18,6 +18,7 @@ import com.trans.libnet.tcpclient.obu.OBU_TM
 import com.trans.libnet.tcpclient.obu.OBU_TPM
 import com.trans.libnet.tcpclient.obu.OBU_VIM
 import com.trans.libnet.udpclinet.DatagramSocketClient
+import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
@@ -98,9 +99,14 @@ class MainActivity : AppCompatActivity() {
                 Log.e(TAG, "断开连接")
             }
 
-            override fun error(e: String?) {
+            override fun error(e: IOException?) {
                 Log.e(TAG, "接受数据错误:$e")
             }
+
+            override fun connectionFail(e: Exception?) {
+                Log.e(TAG, "连接服务器错误:$e")
+            }
+
         }
         SocketClient.setHz(30)
         SocketClient.connect()

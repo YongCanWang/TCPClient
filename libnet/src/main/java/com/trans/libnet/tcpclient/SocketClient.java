@@ -73,6 +73,7 @@ public class SocketClient {
 //                sendACKData(); // 代码不执行
             } catch (Exception e) {
                 Log.e(TAG, "连接服务器错误:" + e);
+                handler.sendMessage(handler.obtainMessage(10005, e));
                 e.printStackTrace();
             }
         }
@@ -82,7 +83,7 @@ public class SocketClient {
      * 监听服务端请求
      */
     private static synchronized void getServiceData() {
-        InputStream inputStream = null;
+        InputStream inputStream;
         try {
             Log.e(TAG, "监听服务器(" + hostname + "):" + port + "端口......");
 //            PrintWriter pw = new PrintWriter(socket.getOutputStream());
@@ -104,9 +105,9 @@ public class SocketClient {
 //            pw.close();
         } catch (IOException e) {
             Log.e(TAG, "接收服务端数据错误:" + e);
-            handler.sendMessage(handler.obtainMessage(10004, e.toString()));
+            handler.sendMessage(handler.obtainMessage(10004, e));
         } finally {
-            Log.e(TAG, "end");
+            Log.e(TAG, "End");
             handler.sendEmptyMessage(10003);
         }
     }
@@ -295,7 +296,12 @@ public class SocketClient {
 
                 case 10004: // 接收异常
                     if (onServiceDataListener != null)
-                        onServiceDataListener.error((String) msg.obj);
+                        onServiceDataListener.error((IOException) msg.obj);
+                    break;
+
+                case 10005: // 连接失败
+                    if (onServiceDataListener != null)
+                        onServiceDataListener.connectionFail((Exception) msg.obj);
                     break;
             }
         }
@@ -320,7 +326,9 @@ public class SocketClient {
 
         void offline();
 
-        void error(String e);
+        void error(IOException e);
+
+        void connectionFail(Exception e);
 
     }
 
