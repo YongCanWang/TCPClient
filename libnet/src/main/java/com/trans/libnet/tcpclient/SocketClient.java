@@ -6,6 +6,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -19,6 +20,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -29,6 +33,8 @@ import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 
@@ -54,7 +60,12 @@ public class SocketClient {
     private static Thread thread;
     private static long lastTime = System.currentTimeMillis();
     private static int hz = 10; //ms 最低接收处理数据的频率，小于该频率的数据，直接丢弃
-    private static final Runnable net = new Runnable() {
+    private static boolean logEnabled = false;  // 是否开启日志
+    private static BufferedWriter bufferedWriter;
+    private static int bufferedIndex = 0;
+    private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final Date date = new Date();
+    static final Runnable net = new Runnable() {
         @Override
         public void run() {
             try {
@@ -108,6 +119,15 @@ public class SocketClient {
             handler.sendMessage(handler.obtainMessage(10004, e));
         } finally {
             Log.e(TAG, "End");
+            if (bufferedWriter != null) {
+                try {
+                    bufferedWriter.close();
+                    bufferedWriter = null;
+                } catch (IOException e) {
+                    Log.e(TAG, "关闭io错误:" + e);
+                    throw new RuntimeException(e);
+                }
+            }
             handler.sendEmptyMessage(10003);
         }
     }
@@ -152,6 +172,21 @@ public class SocketClient {
     private static synchronized void handlerData2(byte[] buffer, int len) {
         String data = new String(buffer, 0, len);
         Log.e(TAG, "收到服务端数据:" + data);
+        if (logEnabled && bufferedWriter != null) {
+            try {
+                date.setTime(System.currentTimeMillis());
+                bufferedWriter.write(simpleDateFormat.format(date) + " ");
+                bufferedWriter.write(data);
+                bufferedWriter.write("\r\n");
+                if (++bufferedIndex % 10 == 0) { // 避免高频率的访问本地磁盘，造成卡顿
+                    bufferedWriter.flush();
+                    bufferedIndex = 0;
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "写入日志错误:" + e);
+                throw new RuntimeException(e);
+            }
+        }
         boolean contains = data.contains(endSymbol);
         if (contains) {
             String[] split = data.split(endSymbol);
@@ -456,5 +491,29 @@ public class SocketClient {
     public static void setHz(int hz) {
         SocketClient.hz = hz;
     }
+
+    public static void logEnabled(boolean enabled) {
+        logEnabled = enabled;
+        if (enabled && bufferedWriter == null) {
+            File logFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
+                    "/trans/textFile/log.txt");
+            if (!logFile.exists()) {
+                try {
+                    logFile.createNewFile();
+                } catch (IOException e) {
+                    Log.e(TAG, "创建日志文件错误:" + e);
+                    throw new RuntimeException(e);
+                }
+            }
+            try {
+                bufferedWriter = new BufferedWriter(
+                        new OutputStreamWriter(new FileOutputStream(logFile, true)));
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, "找不到日志文件:" + e);
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
 
 }
