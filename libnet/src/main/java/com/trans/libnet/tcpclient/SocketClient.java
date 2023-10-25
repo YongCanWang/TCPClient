@@ -538,26 +538,36 @@ public class SocketClient {
 
 
     /**
-     * 是否开启本地日志记录
+     * 是否开启本地日志记录: 需要动态申请本地读写权限
      *
-     * @param enabled 本地日志路径:  /trans/record/log.txt
+     * @param enabled 本地日志路径:  /trans/record/communication_log.txt
      */
     public static void logEnabled(boolean enabled) {
         logEnabled = enabled;
         if (enabled && bufferedWriter == null) {
-            File logFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
-                    "/trans/record/log.txt");
-            if (!logFile.exists()) {
+            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
+                    "/trans/record");
+            if (!file.exists()) {
                 try {
-                    logFile.createNewFile();
-                } catch (IOException e) {
-                    Log.e(TAG, "创建日志文件错误:" + e);
+                    file.mkdirs();
+                } catch (Exception e) {
+                    Log.e(TAG, "创建日志文件夹错误:" + e);
                     throw new RuntimeException(e);
                 }
             }
+
+            File communicationFile = new File(file, "communication_log.txt");
+            try {
+                if (!communicationFile.exists()) {
+                    communicationFile.createNewFile();
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "创建日志文件错误:" + e);
+            }
+
             try {
                 bufferedWriter = new BufferedWriter(
-                        new OutputStreamWriter(new FileOutputStream(logFile, true)));
+                        new OutputStreamWriter(new FileOutputStream(communicationFile, true)));
             } catch (FileNotFoundException e) {
                 Log.e(TAG, "找不到日志文件:" + e);
                 throw new RuntimeException(e);
