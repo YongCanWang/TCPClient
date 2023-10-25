@@ -58,6 +58,8 @@ public class SocketClient {
     private static boolean isSubPackage = false;
     private static final StringBuilder stringBuilder = new StringBuilder(); // 高效处理分包数据
     private static Thread thread;
+    private static LifecycleStatus lifecycleStatus; // 线程的生命周期状态
+    private static boolean isReconnection = false; // 断开连接后,是否自动重新连接
     private static long lastTime = System.currentTimeMillis();
     private static int hz = 10; //ms 最低接收处理数据的频率，小于该频率的数据，直接丢弃
     private static boolean logEnabled = false;  // 是否开启日志
@@ -65,10 +67,11 @@ public class SocketClient {
     private static int bufferedIndex = 0;
     private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final Date date = new Date();
-    static final Runnable net = new Runnable() {
+    private static final Runnable net = new Runnable() {
         @Override
         public void run() {
             try {
+                lifecycleStatus = LifecycleStatus.Running;
                 //socket=new Socket("192.168.1.102", 12345);//注意这里
                 Log.e(TAG, "Init");
                 socket = new Socket();
@@ -86,6 +89,8 @@ public class SocketClient {
                 Log.e(TAG, "连接服务器错误:" + e);
                 handler.sendMessage(handler.obtainMessage(10005, e));
                 e.printStackTrace();
+                // 重新连接服务器
+                reconnection();
             }
         }
     };
@@ -96,7 +101,7 @@ public class SocketClient {
     private static synchronized void getServiceData() {
         InputStream inputStream;
         try {
-            Log.e(TAG, "监听服务器(" + hostname + "):" + port + "端口......");
+            Log.e(TAG, "正在监听服务器(" + hostname + "):" + port + "端口......");
 //            PrintWriter pw = new PrintWriter(socket.getOutputStream());
             inputStream = socket.getInputStream();
             byte[] buffer = new byte[1024 * 2];
@@ -129,6 +134,31 @@ public class SocketClient {
                 }
             }
             handler.sendEmptyMessage(10003);
+
+            // 重新连接服务器
+            reconnection();
+        }
+    }
+
+
+    /**
+     * 重新连接服务器
+     */
+    private static void reconnection() {
+        // reconnection
+        if (isReconnection) {
+            try {
+                Log.e(TAG, "3s后重新连接服务器......");
+                lifecycleStatus = LifecycleStatus.Waiting;
+                thread.sleep(3000);
+            } catch (InterruptedException e) {
+                Log.e(TAG, "休眠线程出错:" + e);
+                throw new RuntimeException(e);
+            }
+            Log.e(TAG, "开始重新连接服务器");
+            net.run();   // reconnection
+        } else {
+            lifecycleStatus = LifecycleStatus.Terminated;
         }
     }
 
@@ -345,12 +375,26 @@ public class SocketClient {
     public static void connect() {
         if (thread == null) {
             thread = new Thread(SocketClient.net);
-            thread.setPriority(10);
+            lifecycleStatus = LifecycleStatus.New;
+            thread.setPriority(Thread.MAX_PRIORITY);
+            lifecycleStatus = LifecycleStatus.Runnable;
             thread.start();
         } else {
-            if (!thread.isAlive()) thread.start();
+            switch (lifecycleStatus) {
+                case New:
+                    break;
+                case Runnable:
+                    break;
+                case Running:
+                    break;
+                case Waiting:
+                    break;
+                case Terminated:
+                    thread = null;
+                    connect();
+                    break;
+            }
         }
-
     }
 
 
@@ -492,11 +536,17 @@ public class SocketClient {
         SocketClient.hz = hz;
     }
 
+
+    /**
+     * 是否开启本地日志记录
+     *
+     * @param enabled 本地日志路径:  /trans/record/log.txt
+     */
     public static void logEnabled(boolean enabled) {
         logEnabled = enabled;
         if (enabled && bufferedWriter == null) {
             File logFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
-                    "/trans/textFile/log.txt");
+                    "/trans/record/log.txt");
             if (!logFile.exists()) {
                 try {
                     logFile.createNewFile();
@@ -515,5 +565,29 @@ public class SocketClient {
         }
     }
 
+
+    /**
+     * 断开连接后,是否重新连接服务器
+     *
+     * @param isReconnection
+     */
+    public static void isReconnection(boolean isReconnection) {
+        SocketClient.isReconnection = isReconnection;
+    }
+
+
+    /**
+     * 线程的生命周期状态
+     */
+    enum LifecycleStatus {
+        New,
+        Runnable,
+        Running,
+        Blocked,
+        Waiting,
+        TimedWaiting,
+        Terminated,
+
+    }
 
 }

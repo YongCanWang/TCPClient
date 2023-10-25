@@ -108,7 +108,9 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+        SocketClient.setHostname("172.19.250.85")
         SocketClient.setHz(30)
+        SocketClient.isReconnection(true)
         SocketClient.connect()
     }
 
