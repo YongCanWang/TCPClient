@@ -53,7 +53,7 @@ public class SocketClient {
     private static String endSymbol = "\0"; // 数据结束符
     private static int timeout = 5000; // 连接超时时间
     private static Socket socket;
-    public static OnServiceDataListener onServiceDataListener;
+    private static OnServiceDataListener onServiceDataListener;
     public static final Gson gson = new Gson();
     private static boolean isSubPackage = false;
     private static final StringBuilder stringBuilder = new StringBuilder(); // 高效处理分包数据
@@ -286,7 +286,7 @@ public class SocketClient {
     }
 
 
-    public static boolean isSubPackage(String data) {
+    private static boolean isSubPackage(String data) {
         return !String.valueOf(data.charAt(data.length())).equals(endSymbol);
     }
 
@@ -372,7 +372,7 @@ public class SocketClient {
         }
     };
 
-    public static void connect() {
+    private static void connect() {
         if (thread == null) {
             thread = new Thread(SocketClient.net);
             lifecycleStatus = LifecycleStatus.New;
@@ -524,15 +524,15 @@ public class SocketClient {
         return true;
     }
 
-    public static void setHostname(String ip) {
+    private static void setHostname(String ip) {
         SocketClient.hostname = ip;
     }
 
-    public static void setPort(int port) {
+    private static void setPort(int port) {
         SocketClient.port = port;
     }
 
-    public static void setHz(int hz) {
+    private static void setHz(int hz) {
         SocketClient.hz = hz;
     }
 
@@ -542,7 +542,7 @@ public class SocketClient {
      *
      * @param enabled 本地日志路径:  /trans/record/communication_log.txt
      */
-    public static void logEnabled(boolean enabled) {
+    private static void logEnabled(boolean enabled) {
         logEnabled = enabled;
         if (enabled && bufferedWriter == null) {
             File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
@@ -581,8 +581,58 @@ public class SocketClient {
      *
      * @param isReconnection
      */
-    public static void isReconnection(boolean isReconnection) {
+    private static void isReconnection(boolean isReconnection) {
         SocketClient.isReconnection = isReconnection;
+    }
+
+
+    public static class Builder {
+
+        public Builder hostname(String ip) {
+            SocketClient.hostname = ip;
+            return this;
+        }
+
+        public Builder port(int port) {
+            SocketClient.port = port;
+            return this;
+        }
+
+        public Builder hz(int hz) {
+            SocketClient.hz = hz;
+            return this;
+        }
+
+        public Builder reconnection(boolean isReconnection) {
+            SocketClient.isReconnection = isReconnection;
+            return this;
+        }
+
+        public Builder log(boolean enabled) {
+            try {
+                SocketClient.logEnabled(enabled);
+            } catch (Exception e) {
+                Log.e(TAG, "logEnabled:" + e);
+                e.printStackTrace();
+            }
+            return this;
+        }
+
+        public Builder listener(OnServiceDataListener listener) {
+            SocketClient.onServiceDataListener = listener;
+            return this;
+        }
+
+
+        public void connect() {
+            SocketClient.connect();
+        }
+
+        public void connect(OnServiceDataListener onServiceDataListener) {
+            SocketClient.onServiceDataListener = onServiceDataListener;
+            SocketClient.connect();
+        }
+
     }
 
 

@@ -39,80 +39,87 @@ class MainActivity : AppCompatActivity() {
          */
 //        Thread(SocketClient.net).start()
 
-        SocketClient.onServiceDataListener = object : OnServiceDataListener {
-            override fun connect() {
-                Log.e(TAG, "连接成功")
-            }
+//        SocketClient.onServiceDataListener =
+//        SocketClient.setHostname("172.19.250.85")
+//        SocketClient.setHz(30)
+//        SocketClient.logEnabled(true)
+//        SocketClient.isReconnection(false)
+//        SocketClient.connect()
 
-            override fun receive(data: String?) {
-                Log.e(TAG, "收到服务器数据:$data")
-                when (SocketClient.getOBUType(data)) {
-                    Constants.HEART -> {
-                        val heart = SocketClient.gson.fromJson(data, OBU_HEART::class.java)
-                        Log.e(TAG, "receive: HEART:" + heart.heart.id)
-                    }
-
-                    Constants.BSM -> {
-                        val bsm = SocketClient.gson.fromJson(data, OBU_BSM::class.java)
-                        Log.e(TAG, "receive: BSM:$bsm")
-                    }
-
-                    Constants.MAP -> {
-                        val map = SocketClient.gson.fromJson(data, OBU_MAP::class.java)
-                        Log.e(TAG, "receive: MAP:$map")
-                    }
-
-                    Constants.RSI -> {
-                        val rsi = SocketClient.gson.fromJson(data, OBU_RSI::class.java)
-                        Log.e(TAG, "receive: RSI:$rsi")
-                    }
-
-                    Constants.RSM -> {
-                        val rsm = SocketClient.gson.fromJson(data, OBU_RSM::class.java)
-                        Log.e(TAG, "receive: RSM:$rsm")
-                    }
-
-                    Constants.SPAT -> {
-                        val spat = SocketClient.gson.fromJson(data, OBU_SPAT::class.java)
-                        Log.e(TAG, "receive: SPAT:$spat")
-                    }
-
-                    Constants.TPM -> {
-                        val tpm = SocketClient.gson.fromJson(data, OBU_TPM::class.java)
-                        Log.e(TAG, "receive: TPM:$tpm")
-                    }
-
-                    Constants.VIM -> {
-                        val vim = SocketClient.gson.fromJson(data, OBU_VIM::class.java)
-                        Log.e(TAG, "receive: VIM:$vim")
-                    }
-
-                    Constants.TM -> {
-                        val tm = SocketClient.gson.fromJson(data, OBU_TM::class.java)
-                        Log.e(TAG, "receive: TM:$tm")
-                    }
-
+        SocketClient.Builder()
+            .listener(object : OnServiceDataListener {
+                override fun connect() {
+                    Log.e(TAG, "连接成功")
                 }
-            }
 
-            override fun offline() {
-                Log.e(TAG, "断开连接")
-            }
+                override fun receive(data: String?) {
+                    Log.e(TAG, "收到服务器数据:$data")
+                    when (SocketClient.getOBUType(data)) {
+                        Constants.HEART -> {
+                            val heart = SocketClient.gson.fromJson(data, OBU_HEART::class.java)
+                            Log.e(TAG, "receive: HEART:" + heart.heart.id)
+                        }
 
-            override fun error(e: IOException?) {
-                Log.e(TAG, "接受数据错误:$e")
-            }
+                        Constants.BSM -> {
+                            val bsm = SocketClient.gson.fromJson(data, OBU_BSM::class.java)
+                            Log.e(TAG, "receive: BSM:$bsm")
+                        }
 
-            override fun connectionFail(e: Exception?) {
-                Log.e(TAG, "连接服务器错误:$e")
-            }
+                        Constants.MAP -> {
+                            val map = SocketClient.gson.fromJson(data, OBU_MAP::class.java)
+                            Log.e(TAG, "receive: MAP:$map")
+                        }
 
-        }
-        SocketClient.setHostname("172.19.250.85")
-        SocketClient.setHz(30)
-        SocketClient.logEnabled(true)
-        SocketClient.isReconnection(false)
-        SocketClient.connect()
+                        Constants.RSI -> {
+                            val rsi = SocketClient.gson.fromJson(data, OBU_RSI::class.java)
+                            Log.e(TAG, "receive: RSI:$rsi")
+                        }
+
+                        Constants.RSM -> {
+                            val rsm = SocketClient.gson.fromJson(data, OBU_RSM::class.java)
+                            Log.e(TAG, "receive: RSM:$rsm")
+                        }
+
+                        Constants.SPAT -> {
+                            val spat = SocketClient.gson.fromJson(data, OBU_SPAT::class.java)
+                            Log.e(TAG, "receive: SPAT:$spat")
+                        }
+
+                        Constants.TPM -> {
+                            val tpm = SocketClient.gson.fromJson(data, OBU_TPM::class.java)
+                            Log.e(TAG, "receive: TPM:$tpm")
+                        }
+
+                        Constants.VIM -> {
+                            val vim = SocketClient.gson.fromJson(data, OBU_VIM::class.java)
+                            Log.e(TAG, "receive: VIM:$vim")
+                        }
+
+                        Constants.TM -> {
+                            val tm = SocketClient.gson.fromJson(data, OBU_TM::class.java)
+                            Log.e(TAG, "receive: TM:$tm")
+                        }
+
+                    }
+                }
+
+                override fun offline() {
+                    Log.e(TAG, "断开连接")
+                }
+
+                override fun error(e: IOException?) {
+                    Log.e(TAG, "接受数据错误:$e")
+                }
+
+                override fun connectionFail(e: Exception?) {
+                    Log.e(TAG, "连接服务器错误:$e")
+                }
+            })
+            .hostname("172.19.250.85")
+            .hz(30)
+            .log(true)
+            .reconnection(false)
+            .connect()
     }
 
     fun onSendTCPDataToService(view: View) {
