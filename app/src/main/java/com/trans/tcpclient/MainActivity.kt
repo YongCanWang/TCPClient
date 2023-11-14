@@ -46,6 +46,9 @@ class MainActivity : AppCompatActivity() {
 //        SocketClient.isReconnection(false)
 //        SocketClient.connect()
 
+        /**
+         * 构建者模式
+         */
         SocketClient.Builder()
             .listener(object : OnServiceDataListener {
                 override fun connect() {
@@ -54,6 +57,7 @@ class MainActivity : AppCompatActivity() {
 
                 override fun receive(data: String?) {
                     Log.e(TAG, "收到服务器数据:$data")
+                    try {
                     when (SocketClient.getOBUType(data)) {
                         Constants.HEART -> {
                             val heart = SocketClient.gson.fromJson(data, OBU_HEART::class.java)
@@ -101,6 +105,9 @@ class MainActivity : AppCompatActivity() {
                         }
 
                     }
+                    } catch (e:Exception) {
+                        Log.e(TAG, "receive: 数据解析错误:$e")
+                    }
                 }
 
                 override fun offline() {
@@ -115,7 +122,10 @@ class MainActivity : AppCompatActivity() {
                     Log.e(TAG, "连接服务器错误:$e")
                 }
             })
-            .hostname("172.19.250.85")
+//            .hostname("192.168.10.123")
+//            .port(7130)
+            .hostname("172.19.251.46")
+            .port(8888)
             .hz(30)
             .log(true)
             .reconnection(false)

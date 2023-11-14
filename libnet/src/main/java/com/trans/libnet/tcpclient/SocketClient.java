@@ -65,6 +65,8 @@ public class SocketClient {
     private static boolean logEnabled = false;  // 是否开启日志
     private static BufferedWriter bufferedWriter;
     private static int bufferedIndex = 0;
+    private static int diskWriteHz = 20; // log日志本地磁盘写入频率
+    private static long millis = 1000; // 1s后重新连接服务端口
     private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final Date date = new Date();
     private static final Runnable net = new Runnable() {
@@ -95,6 +97,7 @@ public class SocketClient {
         }
     };
 
+
     /**
      * 监听服务端请求
      */
@@ -109,12 +112,21 @@ public class SocketClient {
 //            String datas = "";
             while ((len = inputStream.read(buffer)) != -1) {
                 if (System.currentTimeMillis() - lastTime < hz
-                        && stringBuilder.length() == 0) {
+                        && stringBuilder.length() == 0) {   // TODO 有可能过滤掉重要数据,比如解除预警数据
                     Log.e(TAG, "帧率过快(" + hz + "),数据被过滤");
                     continue;
                 }
+
                 handlerData2(buffer, len);
                 lastTime = System.currentTimeMillis();
+
+                /**
+                 *  TODO 数据放到队列去处理 (数据排队处理,是否还需要做过滤处理?)
+                 *  TODO 数据放入了消息队列,handlerData2方法使用synchronized修饰,方法不执行
+                 *  TODO 通过Handler发送到队列中,处理逻辑在主线程执行
+                 */
+//                 handler.sendMessage(handler.obtainMessage(10006,
+//                        new String(buffer, 0, len)));
             }
 //            Log.e(TAG, "datas:" + datas);
             Log.e(TAG, "客户端-服务器: 断开连接");
@@ -148,9 +160,9 @@ public class SocketClient {
         // reconnection
         if (isReconnection) {
             try {
-                Log.e(TAG, "3s后重新连接服务器......");
+                Log.e(TAG, "1s后重新连接服务器......");
                 lifecycleStatus = LifecycleStatus.Waiting;
-                thread.sleep(3000);
+                thread.sleep(millis);
             } catch (InterruptedException e) {
                 Log.e(TAG, "休眠线程出错:" + e);
                 throw new RuntimeException(e);
@@ -193,6 +205,7 @@ public class SocketClient {
 
     }
 
+
     /**
      * 通过结束符 /n 处理数据的分包、粘包
      *
@@ -201,6 +214,16 @@ public class SocketClient {
      */
     private static synchronized void handlerData2(byte[] buffer, int len) {
         String data = new String(buffer, 0, len);
+        handlerData2(data);
+    }
+
+
+    /**
+     * 通过结束符 /n 处理数据的分包、粘包
+     *
+     * @param data
+     */
+    private static synchronized void handlerData2(String data) {
         Log.e(TAG, "收到服务端数据:" + data);
         if (logEnabled && bufferedWriter != null) {
             try {
@@ -208,7 +231,7 @@ public class SocketClient {
                 bufferedWriter.write(simpleDateFormat.format(date) + " ");
                 bufferedWriter.write(data);
                 bufferedWriter.write("\r\n");
-                if (++bufferedIndex % 10 == 0) { // 避免高频率的访问本地磁盘，造成卡顿
+                if (++bufferedIndex % diskWriteHz == 0) { // 避免高频率的访问本地磁盘，造成卡顿
                     bufferedWriter.flush();
                     bufferedIndex = 0;
                 }
@@ -230,7 +253,7 @@ public class SocketClient {
                 if (isJson(dataJson)) {
                     handler.sendMessage(handler.obtainMessage(10002, dataJson));
                 } else {
-                    Log.e(TAG, "handlerData2: 数据丢失:" + dataJson.length());
+                    Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson.length());
                 }
                 stringBuilder.delete(0, stringBuilder.length());
             }
@@ -242,7 +265,7 @@ public class SocketClient {
                     if (isJson(dataJson)) {
                         handler.sendMessage(handler.obtainMessage(10002, dataJson));
                     } else {
-                        Log.e(TAG, "handlerData2: 数据丢失:" + dataJson.length());
+                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson.length());
                     }
                     handler.sendMessage(handler.obtainMessage(10002, dataJson));
                 } else {
@@ -251,7 +274,7 @@ public class SocketClient {
                     if (isJson(dataJson)) {
                         handler.sendMessage(handler.obtainMessage(10002, dataJson));
                     } else {
-                        Log.e(TAG, "handlerData2: 数据丢失:" + dataJson.length());
+                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson.length());
                     }
                     stringBuilder.delete(0, stringBuilder.length());
                 }
@@ -262,7 +285,7 @@ public class SocketClient {
                     if (isJson(dataJson)) {
                         handler.sendMessage(handler.obtainMessage(10002, dataJson));
                     } else {
-                        Log.e(TAG, "handlerData2: 数据丢失:" + dataJson.length());
+                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson.length());
                     }
                 }
 
@@ -273,7 +296,7 @@ public class SocketClient {
                     if (isJson(dataJson)) {
                         handler.sendMessage(handler.obtainMessage(10002, dataJson));
                     } else {
-                        Log.e(TAG, "handlerData2: 数据丢失:" + dataJson.length());
+                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson.length());
                     }
                 } else {// 出现粘包
                     stringBuilder.append(data.trim());
@@ -367,6 +390,11 @@ public class SocketClient {
                 case 10005: // 连接失败
                     if (onServiceDataListener != null)
                         onServiceDataListener.connectionFail((Exception) msg.obj);
+                    break;
+
+                case 10006: // 数据处理
+                    handlerData2((String) msg.obj);
+                    lastTime = System.currentTimeMillis();
                     break;
             }
         }
