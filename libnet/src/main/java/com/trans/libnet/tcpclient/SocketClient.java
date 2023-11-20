@@ -77,7 +77,7 @@ public class SocketClient {
                 //socket=new Socket("192.168.1.102", 12345);//注意这里
                 Log.e(TAG, "Init");
                 socket = new Socket();
-                Log.e(TAG, "start");
+                Log.e(TAG, "Start");
                 SocketAddress socAddress = new InetSocketAddress(hostname, port);
                 Log.e(TAG, "启动客户端:正在与服务器(" + hostname + ")建立连接......");
                 socket.connect(socAddress, timeout);//超时5秒
@@ -111,11 +111,11 @@ public class SocketClient {
             int len = -1;
 //            String datas = "";
             while ((len = inputStream.read(buffer)) != -1) {
-                if (System.currentTimeMillis() - lastTime < hz
-                        && stringBuilder.length() == 0) {   // TODO 有可能过滤掉重要数据,比如解除预警数据
-                    Log.e(TAG, "帧率过快(" + hz + "),数据被过滤");
-                    continue;
-                }
+//                if (System.currentTimeMillis() - lastTime < hz
+//                        && stringBuilder.length() == 0) {   // TODO 有可能过滤掉重要数据,比如解除预警数据
+//                    Log.e(TAG, "帧率过快(" + hz + "),数据被过滤:" +  new String(buffer, 0, len));
+//                    continue;
+//                }
 
                 handlerData2(buffer, len);
                 lastTime = System.currentTimeMillis();
@@ -253,7 +253,7 @@ public class SocketClient {
                 if (isJson(dataJson)) {
                     handler.sendMessage(handler.obtainMessage(10002, dataJson));
                 } else {
-                    Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson.length());
+                    Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson);
                 }
                 stringBuilder.delete(0, stringBuilder.length());
             }
@@ -265,7 +265,7 @@ public class SocketClient {
                     if (isJson(dataJson)) {
                         handler.sendMessage(handler.obtainMessage(10002, dataJson));
                     } else {
-                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson.length());
+                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson);
                     }
                     handler.sendMessage(handler.obtainMessage(10002, dataJson));
                 } else {
@@ -274,7 +274,7 @@ public class SocketClient {
                     if (isJson(dataJson)) {
                         handler.sendMessage(handler.obtainMessage(10002, dataJson));
                     } else {
-                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson.length());
+                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson);
                     }
                     stringBuilder.delete(0, stringBuilder.length());
                 }
@@ -285,7 +285,7 @@ public class SocketClient {
                     if (isJson(dataJson)) {
                         handler.sendMessage(handler.obtainMessage(10002, dataJson));
                     } else {
-                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson.length());
+                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson);
                     }
                 }
 
@@ -296,7 +296,7 @@ public class SocketClient {
                     if (isJson(dataJson)) {
                         handler.sendMessage(handler.obtainMessage(10002, dataJson));
                     } else {
-                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson.length());
+                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson);
                     }
                 } else {// 出现粘包
                     stringBuilder.append(data.trim());
