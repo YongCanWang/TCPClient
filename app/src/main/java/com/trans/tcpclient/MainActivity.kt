@@ -55,6 +55,10 @@ class MainActivity : AppCompatActivity() {
                     Log.e(TAG, "连接成功")
                 }
 
+                override fun connecting() {
+                    Log.e(TAG, "正在连接")
+                }
+
                 override fun receive(data: String?) {
                     Log.e(TAG, "收到服务器数据:$data")
                     try {

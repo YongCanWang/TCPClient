@@ -73,6 +73,7 @@ public class SocketClient {
         @Override
         public void run() {
             try {
+                handler.sendEmptyMessage(10007);
                 lifecycleStatus = LifecycleStatus.Running;
                 //socket=new Socket("192.168.1.102", 12345);//注意这里
                 Log.e(TAG, "Init");
@@ -396,6 +397,11 @@ public class SocketClient {
                     handlerData2((String) msg.obj);
                     lastTime = System.currentTimeMillis();
                     break;
+
+                case 10007: // 正在链接
+                    if (onServiceDataListener != null)
+                        onServiceDataListener.connecting();
+                    break;
             }
         }
     };
@@ -428,6 +434,8 @@ public class SocketClient {
 
     public interface OnServiceDataListener {
         void connect();
+
+        void connecting();
 
         void receive(String data);
 
