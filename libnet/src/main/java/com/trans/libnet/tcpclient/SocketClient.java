@@ -158,18 +158,18 @@ public class SocketClient {
      * 重新连接服务器
      */
     private static void reconnection() {
+        if (thread == null) return;
         // reconnection
         if (isReconnection) {
             try {
                 Log.e(TAG, "1s后重新连接服务器......");
                 lifecycleStatus = LifecycleStatus.Waiting;
                 thread.sleep(millis);
+                Log.e(TAG, "开始重新连接服务器");
+                net.run();   // reconnection
             } catch (InterruptedException e) {
                 Log.e(TAG, "休眠线程出错:" + e);
-                throw new RuntimeException(e);
             }
-            Log.e(TAG, "开始重新连接服务器");
-            net.run();   // reconnection
         } else {
             lifecycleStatus = LifecycleStatus.Terminated;
         }
@@ -431,6 +431,14 @@ public class SocketClient {
         }
     }
 
+    private static void disconnect() {
+        if (thread != null) {
+            thread.interrupt();
+            thread = null;
+            Log.e(TAG, "disconnect: 中断线程");
+        }
+    }
+
 
     public interface OnServiceDataListener {
         void connect();
@@ -664,9 +672,14 @@ public class SocketClient {
             SocketClient.connect();
         }
 
+
         public void connect(OnServiceDataListener onServiceDataListener) {
             SocketClient.onServiceDataListener = onServiceDataListener;
             SocketClient.connect();
+        }
+
+        public void disconnect() {
+            SocketClient.disconnect();
         }
 
     }
