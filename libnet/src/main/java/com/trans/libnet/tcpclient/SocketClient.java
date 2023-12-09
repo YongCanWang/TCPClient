@@ -51,7 +51,7 @@ public class SocketClient {
     //    private static int port = 12345; // 手机服务器端口
     private static int port = 7130; // obu设备端口
     private static String endSymbol = "\0"; // 数据结束符
-    private static int timeout = 5000; // 连接超时时间
+    private static int timeout = 3000; // 连接超时时间
     private static Socket socket;
     private static OnServiceDataListener onServiceDataListener;
     public static final Gson gson = new Gson();
