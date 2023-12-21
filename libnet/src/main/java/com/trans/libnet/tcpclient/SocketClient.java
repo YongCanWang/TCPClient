@@ -226,58 +226,37 @@ public class SocketClient {
      */
     private static synchronized void handlerData2(String data) {
         Log.e(TAG, "收到服务端数据:" + data);
-        if (logEnabled && bufferedWriter != null) {
-            try {
-                date.setTime(System.currentTimeMillis());
-                bufferedWriter.write(simpleDateFormat.format(date) + " ");
-                bufferedWriter.write(data);
-                bufferedWriter.write("\r\n");
-                if (++bufferedIndex % diskWriteHz == 0) { // 避免高频率的访问本地磁盘，造成卡顿
-                    bufferedWriter.flush();
-                    bufferedIndex = 0;
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "写入日志错误:" + e);
-                throw new RuntimeException(e);
-            }
-        }
         boolean contains = data.contains(endSymbol);
         if (contains) {
             String[] split = data.split(endSymbol);
-            if (split.length == 0) { // 分包处理
-                stringBuilder.append(data.trim());
-            }
-
-            if (split.length == 1) { // 完整一条数据
-                stringBuilder.append(split[0].trim());
-                String dataJson = stringBuilder.toString().trim();
-                if (isJson(dataJson)) {
-                    handler.sendMessage(handler.obtainMessage(10002, dataJson));
-                } else {
-                    Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson);
-                }
-                stringBuilder.delete(0, stringBuilder.length());
-            }
-
-            if (split.length >= 2) {  // 分包处理 + 分包中带粘包
-                // 处理第一条数据
-                if (stringBuilder.length() == 0) {  // 完整数据
-                    String dataJson = split[0].trim();
-                    if (isJson(dataJson)) {
-                        handler.sendMessage(handler.obtainMessage(10002, dataJson));
-                    } else {
-                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson);
+            Log.i(TAG, "粘包个数:" + split.length);
+            if (split.length == 1) { // 一条数据
+                String firstDtaJson = split[0].trim();
+                if (isJson(firstDtaJson)) {  // 完整一条数据
+                    handler.sendMessage(handler.obtainMessage(10002, firstDtaJson));
+                } else { // 分包数据
+                    stringBuilder.append(firstDtaJson);
+                    // 拼接后，验证一下拼接数据是否拼接完成，是否为一条完整的json数据
+                    String firstStringBuilder = stringBuilder.toString().trim();
+                    if (isJson(firstStringBuilder)) {
+                        handler.sendMessage(handler.obtainMessage(10002, firstStringBuilder));
+                        stringBuilder.delete(0, stringBuilder.length());
                     }
-                    handler.sendMessage(handler.obtainMessage(10002, dataJson));
-                } else {
-                    stringBuilder.append(split[0]); // 被分包
+                }
+            } else if (split.length >= 2) {  // 分包处理 + 分包中带粘包
+                // 处理第一条数据
+                String dataJson1 = split[0].trim();
+                if (isJson(dataJson1)) {  // 第一条数据是完整数据，直接发送
+                    handler.sendMessage(handler.obtainMessage(10002, dataJson1));
+                    stringBuilder.delete(0, stringBuilder.length());
+                } else {  // 分包数据，进行数据拼接
+                    stringBuilder.append(dataJson1);
+                    // 拼接后，验证一下拼接数据是否拼接完成，是否为一条完整的json数据
                     String dataJson = stringBuilder.toString().trim();
                     if (isJson(dataJson)) {
                         handler.sendMessage(handler.obtainMessage(10002, dataJson));
-                    } else {
-                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson);
+                        stringBuilder.delete(0, stringBuilder.length());
                     }
-                    stringBuilder.delete(0, stringBuilder.length());
                 }
 
                 // 处理粘包数据
@@ -292,21 +271,20 @@ public class SocketClient {
 
                 // 处理最后一条数据
                 // 最后一条数据是否出现粘包
-                if (String.valueOf(data.charAt(data.length() - 1)).equals(endSymbol)) {  // 完整数据
-                    String dataJson = split[split.length - 1].trim();
-                    if (isJson(dataJson)) {
-                        handler.sendMessage(handler.obtainMessage(10002, dataJson));
-                    } else {
-                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson);
+                String endData = split[split.length - 1].trim();
+                if (isJson(endData)) { // 最后一条数据为完整数据，直接发送
+                    handler.sendMessage(handler.obtainMessage(10002, endData));
+                } else { // 最后一条数据为粘包数据，进行数据拼接
+                    stringBuilder.append(endData);
+                    // 拼接后，验证一下拼接数据是否拼接完成，是否为一条完整的json数据
+                    String endStringBuilder = stringBuilder.toString().trim();
+                    if (isJson(endStringBuilder)) {
+                        handler.sendMessage(handler.obtainMessage(10002, endStringBuilder));
+                        stringBuilder.delete(0, stringBuilder.length());
                     }
-                } else {// 出现粘包
-                    stringBuilder.append(data.trim());
                 }
             }
-        } else {
-            stringBuilder.append(data);
         }
-
     }
 
 

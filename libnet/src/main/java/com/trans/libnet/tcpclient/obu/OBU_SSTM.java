@@ -32,7 +32,7 @@ public class OBU_SSTM {
         private int likelyEndTimeAttributes;
         private PosBean pos;
         private double speed;
-        private int speedLimit;
+        private double speedLimit;
         private int type;
 
         public double getDistance() {
@@ -107,11 +107,11 @@ public class OBU_SSTM {
             this.speed = speed;
         }
 
-        public int getSpeedLimit() {
+        public double getSpeedLimit() {
             return speedLimit;
         }
 
-        public void setSpeedLimit(int speedLimit) {
+        public void setSpeedLimit(double speedLimit) {
             this.speedLimit = speedLimit;
         }
 
