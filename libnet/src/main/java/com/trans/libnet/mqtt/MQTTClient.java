@@ -1,4 +1,4 @@
-package com.trans.libnet.tcpclient;
+package com.trans.libnet.mqtt;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -16,43 +16,49 @@ import androidx.annotation.NonNull;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.eclipse.paho.android.service.MqttAndroidClient;
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.Iterator;
 
 /**
  * @author Tom灿
- * @description: TCP通信客户端 要求在同一局域网下(同一网段)
+ * @description: MQTT通信客户端 要求在同一局域网下(同一网段)
  * @date :2023/5/25 9:24
  */
-public class NetSocketClient {
-    private static final String TAG = "NetSocketClient";
-    //        private static String hostname = "172.19.250.161"; // 手机服务器IP
-    private static String hostname = "192.168.10.123"; // obu设备IP
-    //    private static String hostname = "172.19.250.13"; // 网络调试助手IP
-    //    private static int port = 12345; // 手机服务器端口
-    private static int port = 7130; // obu设备端口
+public class MQTTClient {
+    private static final String TAG = "MQTTClient";
+    private static Context context;
+    private static final String serverURI = "ssl://z8ce6691.ala.cn-hangzhou.emqxsl.cn:8883"; // 连接成功-emqx使用服务地址
+    //    private final String serverURI = "tcp://broker.emqx.io:1883"; // 连接成功-emqx测试地址
+//    private final String serverURI = "ssl://broker.emqx.io:8883"; // 连接成功-emqx测试地址
+    private static String hostname = "z8ce6691.ala.cn-hangzhou.emqxsl.cn"; // emqx地址
+    //    private static String hostname = "z8ce6691.ala.cn-hangzhou.emqxsl.cn"; // emqx地址
+    private static int port = 8883; // emqx测试端口
+    private static String userName = "emqx_admin";
+    private static String password = "123456";
+    private static String clientId = "android_client_test";
+    private static String subTopic = "topic_android_test";
     private static String endSymbol = "\0"; // 数据结束符
-    private static int timeout = 3000; // 连接超时时间
-    private static Socket socket;
+    private static int timeout = 10000; // 连接超时时间
     private static OnServiceDataListener onServiceDataListener;
     public static final Gson gson = new Gson();
     private static boolean isSubPackage = false;
@@ -69,27 +75,21 @@ public class NetSocketClient {
     private static long millis = 1000; // 1s后重新连接服务端口
     private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final Date date = new Date();
+    private static MqttAndroidClient mqttAndroidClient;
+    private static MqttConnectOptions mqttConnectOptions;
+
     private static final Runnable net = new Runnable() {
         @Override
         public void run() {
             try {
                 handler.sendEmptyMessage(10007);
                 lifecycleStatus = LifecycleStatus.Running;
-                //socket=new Socket("192.168.1.102", 12345);//注意这里
                 Log.e(TAG, "Init");
-                socket = new Socket();
-                Log.e(TAG, "Start");
-                SocketAddress socAddress = new InetSocketAddress(hostname, port);
-                Log.e(TAG, "启动客户端:正在与服务器(" + hostname + ")建立连接......");
-                socket.connect(socAddress, timeout);//超时5秒
-                Log.e(TAG, "连接服务器成功(超时值" + timeout + "ms)");  // 连接服务器成功，并进入阻塞状态...
-                handler.sendEmptyMessage(10001);
-                // 监听服务端
-                getServiceData();
-                // 发送数据到客户端
-//                sendACKData(); // 代码不执行
+                initMQTTClient(context);
+                Log.e(TAG, "Start客户端:正在与MQTT Service(" + hostname + ")建立连接,超时值" + timeout + "ms......");
+                connectMQTT();
             } catch (Exception e) {
-                Log.e(TAG, "连接服务器错误:" + e);
+                Log.e(TAG, "MQTT Service连接错误:" + e);
                 handler.sendMessage(handler.obtainMessage(10005, e));
                 e.printStackTrace();
                 // 重新连接服务器
@@ -97,63 +97,6 @@ public class NetSocketClient {
             }
         }
     };
-
-
-    /**
-     * 监听服务端请求
-     */
-    private static synchronized void getServiceData() {
-        InputStream inputStream;
-        try {
-            Log.e(TAG, "正在监听服务器(" + hostname + "):" + port + "端口......");
-//            PrintWriter pw = new PrintWriter(socket.getOutputStream());
-            inputStream = socket.getInputStream();
-            byte[] buffer = new byte[1024 * 2];
-            int len = -1;
-//            String datas = "";
-            while ((len = inputStream.read(buffer)) != -1) {
-//                if (System.currentTimeMillis() - lastTime < hz
-//                        && stringBuilder.length() == 0) {   // TODO 有可能过滤掉重要数据,比如解除预警数据
-//                    Log.e(TAG, "帧率过快(" + hz + "),数据被过滤:" +  new String(buffer, 0, len));
-//                    continue;
-//                }
-
-                handlerData2(buffer, len);
-                lastTime = System.currentTimeMillis();
-
-                /**
-                 *  TODO 数据放到队列去处理 (数据排队处理,是否还需要做过滤处理?)
-                 *  TODO 数据放入了消息队列,handlerData2方法使用synchronized修饰,方法不执行
-                 *  TODO 通过Handler发送到队列中,处理逻辑在主线程执行
-                 */
-//                handler.sendMessage(handler.obtainMessage(10006,
-//                        new String(buffer, 0, len)));
-//                handler.sendMessageDelayed(handler.obtainMessage(10006,
-//                        new String(buffer, 0, len)), 3000);
-            }
-//            Log.e(TAG, "datas:" + datas);
-            Log.e(TAG, "客户端-服务器: 断开连接");
-//            pw.close();
-        } catch (IOException e) {
-            Log.e(TAG, "接收服务端数据错误:" + e);
-            handler.sendMessage(handler.obtainMessage(10004, e));
-        } finally {
-            Log.e(TAG, "End");
-            if (bufferedWriter != null) {
-                try {
-                    bufferedWriter.close();
-                    bufferedWriter = null;
-                } catch (IOException e) {
-                    Log.e(TAG, "关闭io错误:" + e);
-                    throw new RuntimeException(e);
-                }
-            }
-            handler.sendEmptyMessage(10003);
-
-            // 重新连接服务器
-            reconnection();
-        }
-    }
 
 
     /**
@@ -176,6 +119,162 @@ public class NetSocketClient {
             lifecycleStatus = LifecycleStatus.Terminated;
         }
     }
+
+    /**
+     * MQTT初始化
+     */
+    private static void initMQTTClient(Context context) {
+        try {
+            if (mqttAndroidClient == null) {
+                mqttAndroidClient = new MqttAndroidClient(context,
+                        "ssl://" + hostname + ":" + port, clientId);
+                mqttAndroidClient.setCallback(new MqttCallbackExtended() {
+                    @Override
+                    public void connectComplete(boolean reconnect, String serverURI) {
+                        if (reconnect) {
+                            Log.e(TAG, "MQTT Service 重新连接成功: serverURI:" + serverURI);
+                        } else {
+                            Log.e(TAG, "MQTT Service 连接成功: serverURI:" + serverURI);
+                        }
+//                        handler.sendEmptyMessage(10001);  //两个成功回调，去掉一个
+                        // 订阅所有主题
+                        subscribeAllTopics();
+                    }
+
+                    @Override
+                    public void connectionLost(Throwable cause) {
+                        Log.e(TAG, "MQTT Service 连接断开:" + cause);
+                        handler.sendEmptyMessage(10003);
+//                        mqttAndroidClient.close();
+                        reconnection();
+                    }
+
+                    @Override
+                    public void messageArrived(String topic, MqttMessage message) {
+                        Log.e(TAG, "收到MQTT消息: topic:" + topic + "---message:" + message.toString() + "---qos:" + message.getQos());
+                        handler.sendMessage(handler.obtainMessage(10002, message.toString().trim()));
+//                        handlerData2(message.toString()); // TODO 暂时不处理数据
+                    }
+
+                    @Override
+                    public void deliveryComplete(IMqttDeliveryToken token) {
+                        try {
+                            MqttMessage mqttMessage = token.getMessage();
+                            Log.e(TAG, "消息发送成功:" + mqttMessage.toString());
+                        } catch (MqttException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+
+
+            // 新建连接设置
+            if (mqttConnectOptions == null) {
+                mqttConnectOptions = new MqttConnectOptions();
+                mqttConnectOptions.setUserName(userName);
+                mqttConnectOptions.setPassword(password.toCharArray());
+                //断开后，是否自动连接
+                mqttConnectOptions.setAutomaticReconnect(true);
+                //是否清空客户端的连接记录。若为true，则断开后，broker将自动清除该客户端连接信息
+                mqttConnectOptions.setCleanSession(true);
+                //设置超时时间，单位为秒
+                mqttConnectOptions.setConnectionTimeout(timeout);
+                //心跳时间，单位为秒。即多长时间确认一次Client端是否在线
+                mqttConnectOptions.setKeepAliveInterval(30);
+                //允许同时发送几条消息（未收到broker确认信息）
+                mqttConnectOptions.setMaxInflight(30);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "MQTT客户端初始化错误:" + e);
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * 连接MQTT
+     */
+    private static void connectMQTT() {
+        try {
+            mqttAndroidClient.connect(mqttConnectOptions, null, new IMqttActionListener() {
+                @Override
+                public void onSuccess(IMqttToken asyncActionToken) {
+                    Log.e(TAG, "MQTT Service 连接成功！！！");
+                    handler.sendEmptyMessage(10001);
+                }
+
+                @Override
+                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    Log.e(TAG, "MQTT Service 连接失败:" + exception);
+                    handler.sendMessage(handler.obtainMessage(10005, new Exception(exception.toString())));
+                    reconnection();
+                }
+            });
+        } catch (MqttException e) {
+            Log.e(TAG, "MQTT Service 连接错误:" + e);
+            handler.sendMessage(handler.obtainMessage(10005, e));
+            e.printStackTrace();
+            reconnection();
+        }
+    }
+
+
+    /**
+     * 订阅所有主题
+     */
+    private static void subscribeAllTopics() {
+        //订阅主消息主题和更新消息主题
+        subscribeToTopic(subTopic, 2);
+    }
+
+
+    /**
+     * 订阅一个主主题
+     *
+     * @param subTopic 主题名称
+     */
+    private static void subscribeToTopic(String subTopic, int qos) {
+        try {
+            mqttAndroidClient.subscribe(subTopic, qos, null, new IMqttActionListener() {
+                @Override
+                public void onSuccess(IMqttToken asyncActionToken) {
+                    Log.e(TAG, "MQTT订阅消息成功:" + subTopic);
+                }
+
+                @Override
+                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    Log.e(TAG, "MQTT订阅消息失败:" + subTopic);
+                }
+            });
+        } catch (MqttException ex) {
+            Log.e(TAG, "MQTT订阅消息错误:" + ex);
+            ex.printStackTrace();
+        }
+    }
+
+
+    /**
+     * 发布主题
+     *
+     * @param topic 主题
+     * @param msg   内容
+     * @param qos   qos
+     */
+    public static void publishMessage(String topic, String msg, int qos) {
+        if (mqttAndroidClient != null && mqttAndroidClient.isConnected()) {
+            try {
+                Log.e(TAG, "发布主题:topic:" + topic + "---message:" + msg + "---qos:" + qos);
+                mqttAndroidClient.publish(topic, msg.getBytes(), qos, false);
+            } catch (Exception e) {
+                Log.e(TAG, "发布主题错误:" + e);
+                e.printStackTrace();
+            }
+        } else {
+            Log.e(TAG, "发布主题失败！！！ MQTT Service 未连接！！！");
+        }
+    }
+
 
     /**
      * 通过是否是json
@@ -295,55 +394,6 @@ public class NetSocketClient {
     }
 
 
-    /**
-     * 发送数据到服务端
-     *
-     * @param msg
-     */
-    public static void sendDataToService(String msg) {
-        if (socket != null && socket.isConnected()) {
-            new Thread(() -> {
-                try {
-                    socket.getOutputStream().write(msg.getBytes());
-                    socket.getOutputStream().flush();
-                    Log.e(TAG, "发送数据给服务端");
-                } catch (IOException e) {
-                    Log.e(TAG, "发送数据错误:" + e);
-                    e.printStackTrace();
-                }
-            }).start();
-        } else {
-            Log.e(TAG, "发送数据错误:连接失败");
-        }
-    }
-
-    /**
-     * 发送回执数据
-     */
-    private static void sendACKData() {
-        //发送给服务端的消息
-        String msg = "Hello,我来自客户端(ACK)";
-        try {
-            Log.e(TAG, "发送回执数据......");
-            //获取输出流并实例化
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            out.write(msg + "\n");//防止粘包
-            out.flush();//不加这个flush会怎样？
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e(TAG, "发送回执数据错误:" + e);
-        } finally {
-            //关闭Socket
-            try {
-                socket.close();
-            } catch (IOException e) {
-                Log.e(TAG, "关闭客户端错误:" + e);
-            }
-            Log.e(TAG, "客户端关闭");
-        }
-    }
-
-
     @SuppressLint("HandlerLeak")
     private static final Handler handler = new Handler() {
         @Override
@@ -388,7 +438,7 @@ public class NetSocketClient {
 
     private static void connect() {
         if (thread == null) {
-            thread = new Thread(NetSocketClient.net);
+            thread = new Thread(MQTTClient.net);
             lifecycleStatus = LifecycleStatus.New;
             thread.setPriority(Thread.MAX_PRIORITY);
             lifecycleStatus = LifecycleStatus.Runnable;
@@ -485,51 +535,6 @@ public class NetSocketClient {
         return (ip & 0xFF) + "." + ((ip >> 8) & 0xFF) + "." + ((ip >> 16) & 0xFF) + "." + (ip >> 24 & 0xFF);
     }
 
-    /**
-     * 获取OBU数据类型
-     *
-     * @param dataKey
-     * @return
-     */
-    public static String getOBUType(String dataKey) {
-        try {
-
-            JSONObject jsonObject = new JSONObject(dataKey);
-//            JSONArray jsonArray = new JSONArray(dataKey);
-//            JSONObject base = jsonObject.getJSONObject("base");
-            Iterator<String> keys = jsonObject.keys();
-            String next = keys.next();
-            jsonObject = null;
-            keys = null;
-            Log.e(TAG, "getOBUType: " + next); // RSM
-
-//            JsonParser jsonParser = new JsonParser();
-//            JsonElement parse = jsonParser.parse(dataKey);
-//            Set<String> strings1 = parse.getAsJsonObject().keySet();
-//            Log.e(TAG, "getOBUType: " + strings1);  //[RSM]
-//            if (parse.isJsonNull() || !parse.isJsonObject()) {
-//                Log.e(TAG, "not json data");
-//                return "not json data";
-//            }
-
-//            JsonObject jsonObject2 = new JsonObject();
-//            jsonObject2.add("jsonKey", parse);
-//            Set<String> strings2 = jsonObject2.keySet();
-//            String next1 = strings2.iterator().next();
-//            Log.e(TAG, "getOBUType: " + next1); // jsonKey
-//
-//            Map<String, JsonElement> stringJsonElementMap = jsonObject2.asMap();
-//            Set<String> strings = stringJsonElementMap.keySet();
-//            String next2 = strings.iterator().next();
-//            Log.e(TAG, "getOBUType: " + next2); // jsonKey
-
-            return next;
-        } catch (JSONException e) {
-            Log.e(TAG, "getOBUType:获取OBU数据类型错误 ---> JSONException:" + e);
-            e.printStackTrace();
-        }
-        return "";
-    }
 
     private static final JsonParser jsonParser = new JsonParser();
 
@@ -549,22 +554,22 @@ public class NetSocketClient {
     }
 
     private static void setHostname(String ip) {
-        NetSocketClient.hostname = ip;
+        MQTTClient.hostname = ip;
     }
 
     private static void setPort(int port) {
-        NetSocketClient.port = port;
+        MQTTClient.port = port;
     }
 
     private static void setHz(int hz) {
-        NetSocketClient.hz = hz;
+        MQTTClient.hz = hz;
     }
 
 
     /**
      * 是否开启本地日志记录: 需要动态申请本地读写权限
      *
-     * @param enabled 本地日志路径:  /trans/record/communication_log.txt
+     * @param enabled 本地日志路径:  /trans/record/communication_mqtt_log.txt
      */
     private static void logEnabled(boolean enabled) {
         logEnabled = enabled;
@@ -580,7 +585,7 @@ public class NetSocketClient {
                 }
             }
 
-            File communicationFile = new File(file, "communication_log.txt");
+            File communicationFile = new File(file, "communication_mqtt_log.txt");
             try {
                 if (!communicationFile.exists()) {
                     communicationFile.createNewFile();
@@ -606,35 +611,60 @@ public class NetSocketClient {
      * @param isReconnection
      */
     private static void isReconnection(boolean isReconnection) {
-        NetSocketClient.isReconnection = isReconnection;
+        MQTTClient.isReconnection = isReconnection;
     }
 
 
     public static class Builder {
 
-        public Builder hostname(String ip) {
-            NetSocketClient.hostname = ip;
+        public Builder con(Context con) {
+            MQTTClient.context = con;
+            return this;
+        }
+
+        public Builder host(String host) {
+            MQTTClient.hostname = host;
             return this;
         }
 
         public Builder port(int port) {
-            NetSocketClient.port = port;
+            MQTTClient.port = port;
+            return this;
+        }
+
+        public Builder name(String name) {
+            MQTTClient.userName = name;
+            return this;
+        }
+
+        public Builder password(String pwd) {
+            MQTTClient.password = pwd;
+            return this;
+        }
+
+        public Builder id(String id) {
+            MQTTClient.clientId = id;
+            return this;
+        }
+
+        public Builder topic(String topic) {
+            MQTTClient.subTopic = topic;
             return this;
         }
 
         public Builder hz(int hz) {
-            NetSocketClient.hz = hz;
+            MQTTClient.hz = hz;
             return this;
         }
 
         public Builder reconnection(boolean isReconnection) {
-            NetSocketClient.isReconnection = isReconnection;
+            MQTTClient.isReconnection = isReconnection;
             return this;
         }
 
         public Builder log(boolean enabled) {
             try {
-                NetSocketClient.logEnabled(enabled);
+                MQTTClient.logEnabled(enabled);
             } catch (Exception e) {
                 Log.e(TAG, "logEnabled:" + e);
                 e.printStackTrace();
@@ -643,23 +673,23 @@ public class NetSocketClient {
         }
 
         public Builder listener(OnServiceDataListener listener) {
-            NetSocketClient.onServiceDataListener = listener;
+            MQTTClient.onServiceDataListener = listener;
             return this;
         }
 
 
         public void connect() {
-            NetSocketClient.connect();
+            MQTTClient.connect();
         }
 
 
         public void connect(OnServiceDataListener onServiceDataListener) {
-            NetSocketClient.onServiceDataListener = onServiceDataListener;
-            NetSocketClient.connect();
+            MQTTClient.onServiceDataListener = onServiceDataListener;
+            MQTTClient.connect();
         }
 
         public void disconnect() {
-            NetSocketClient.disconnect();
+            MQTTClient.disconnect();
         }
 
     }

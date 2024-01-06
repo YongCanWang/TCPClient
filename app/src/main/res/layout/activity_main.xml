@@ -35,6 +35,23 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
+    <Button
+        android:onClick="onConnectMQTTService"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect MQTT Service"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:onClick="onPublishMessageToMQTTService"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Publish Message To MQTT Service"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/tv_ip"
         android:layout_marginTop="20dp"

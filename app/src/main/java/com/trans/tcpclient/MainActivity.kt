@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.trans.libnet.mqtt.MQTTClient
 import com.trans.libnet.tcpclient.SocketClient
 import com.trans.libnet.tcpclient.SocketClient.OnServiceDataListener
 import com.trans.libnet.tcpclient.obu.Constants
@@ -60,56 +61,56 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun receive(data: String?) {
-                    Log.e(TAG, "收到服务器数据:$data")
+                    Log.e(TAG, "收到服务端数据:$data")
                     try {
-                    when (SocketClient.getOBUType(data)) {
-                        Constants.HEART -> {
-                            val heart = SocketClient.gson.fromJson(data, OBU_HEART::class.java)
-                            Log.e(TAG, "receive: HEART:" + heart.heart.id)
-                        }
+                        when (SocketClient.getOBUType(data)) {
+                            Constants.HEART -> {
+                                val heart = SocketClient.gson.fromJson(data, OBU_HEART::class.java)
+                                Log.e(TAG, "receive: HEART:" + heart.heart.id)
+                            }
 
-                        Constants.BSM -> {
-                            val bsm = SocketClient.gson.fromJson(data, OBU_BSM::class.java)
-                            Log.e(TAG, "receive: BSM:$bsm")
-                        }
+                            Constants.BSM -> {
+                                val bsm = SocketClient.gson.fromJson(data, OBU_BSM::class.java)
+                                Log.e(TAG, "receive: BSM:$bsm")
+                            }
 
-                        Constants.MAP -> {
-                            val map = SocketClient.gson.fromJson(data, OBU_MAP::class.java)
-                            Log.e(TAG, "receive: MAP:$map")
-                        }
+                            Constants.MAP -> {
+                                val map = SocketClient.gson.fromJson(data, OBU_MAP::class.java)
+                                Log.e(TAG, "receive: MAP:$map")
+                            }
 
-                        Constants.RSI -> {
-                            val rsi = SocketClient.gson.fromJson(data, OBU_RSI::class.java)
-                            Log.e(TAG, "receive: RSI:$rsi")
-                        }
+                            Constants.RSI -> {
+                                val rsi = SocketClient.gson.fromJson(data, OBU_RSI::class.java)
+                                Log.e(TAG, "receive: RSI:$rsi")
+                            }
 
-                        Constants.RSM -> {
-                            val rsm = SocketClient.gson.fromJson(data, OBU_RSM::class.java)
-                            Log.e(TAG, "receive: RSM:$rsm")
-                        }
+                            Constants.RSM -> {
+                                val rsm = SocketClient.gson.fromJson(data, OBU_RSM::class.java)
+                                Log.e(TAG, "receive: RSM:$rsm")
+                            }
 
-                        Constants.SPAT -> {
-                            val spat = SocketClient.gson.fromJson(data, OBU_SPAT::class.java)
-                            Log.e(TAG, "receive: SPAT:$spat")
-                        }
+                            Constants.SPAT -> {
+                                val spat = SocketClient.gson.fromJson(data, OBU_SPAT::class.java)
+                                Log.e(TAG, "receive: SPAT:$spat")
+                            }
 
-                        Constants.TPM -> {
-                            val tpm = SocketClient.gson.fromJson(data, OBU_TPM::class.java)
-                            Log.e(TAG, "receive: TPM:$tpm")
-                        }
+                            Constants.TPM -> {
+                                val tpm = SocketClient.gson.fromJson(data, OBU_TPM::class.java)
+                                Log.e(TAG, "receive: TPM:$tpm")
+                            }
 
-                        Constants.VIM -> {
-                            val vim = SocketClient.gson.fromJson(data, OBU_VIM::class.java)
-                            Log.e(TAG, "receive: VIM:$vim")
-                        }
+                            Constants.VIM -> {
+                                val vim = SocketClient.gson.fromJson(data, OBU_VIM::class.java)
+                                Log.e(TAG, "receive: VIM:$vim")
+                            }
 
-                        Constants.TM -> {
-                            val tm = SocketClient.gson.fromJson(data, OBU_TM::class.java)
-                            Log.e(TAG, "receive: TM:$tm")
-                        }
+                            Constants.TM -> {
+                                val tm = SocketClient.gson.fromJson(data, OBU_TM::class.java)
+                                Log.e(TAG, "receive: TM:$tm")
+                            }
 
-                    }
-                    } catch (e:Exception) {
+                        }
+                    } catch (e: Exception) {
                         Log.e(TAG, "receive: 数据解析错误:$e")
                     }
                 }
@@ -142,5 +143,41 @@ class MainActivity : AppCompatActivity() {
 
     fun onSendUDPDataToService(view: View) {
         Thread(DatagramSocketClient.net).start()
+    }
+
+    fun onConnectMQTTService(view: View) {
+        MQTTClient.Builder()
+            .con(this)
+            .reconnection(true)
+            .connect(object : MQTTClient.OnServiceDataListener {
+                override fun connect() {
+                    Log.e(TAG, "连接成功")
+                }
+
+                override fun connecting() {
+                    Log.e(TAG, "正在连接")
+                }
+
+                override fun receive(data: String?) {
+                    Log.e(TAG, "收到服务端数据:$data")
+                }
+
+                override fun offline() {
+                    Log.e(TAG, "断开连接")
+                }
+
+                override fun error(e: IOException?) {
+                    Log.e(TAG, "接受数据错误:$e")
+                }
+
+                override fun connectionFail(e: Exception?) {
+                    Log.e(TAG, "连接服务器错误:$e")
+                }
+
+            })
+    }
+
+    fun onPublishMessageToMQTTService(view: View) {
+        MQTTClient.publishMessage("topic_android_test", "你好，我来自Android客户端！！！", 2)
     }
 }
