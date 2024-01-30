@@ -228,6 +228,7 @@ public class NetSocketClient {
      */
     private static synchronized void handlerData2(String data) {
         Log.e(TAG, "收到服务端数据:" + data);
+        writerLogInfo(data);
         boolean contains = data.contains(endSymbol);
         if (contains) {
             String[] split = data.split(endSymbol);
@@ -289,6 +290,27 @@ public class NetSocketClient {
         }
     }
 
+    /**
+     * 数据信息写入本地
+     * @param data
+     */
+    private static void writerLogInfo(String data) {
+        if (logEnabled && bufferedWriter != null) {
+            try {
+                date.setTime(System.currentTimeMillis());
+                bufferedWriter.write(simpleDateFormat.format(date) + " ");
+                bufferedWriter.write(data);
+                bufferedWriter.write("\r\n");
+                if (++bufferedIndex % diskWriteHz == 0) { // 避免高频率的访问本地磁盘，造成卡顿
+                    bufferedWriter.flush();
+                    bufferedIndex = 0;
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "写入日志错误:" + e);
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
     private static boolean isSubPackage(String data) {
         return !String.valueOf(data.charAt(data.length())).equals(endSymbol);

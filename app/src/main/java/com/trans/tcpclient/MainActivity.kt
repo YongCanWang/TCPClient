@@ -149,10 +149,10 @@ class MainActivity : AppCompatActivity() {
         MQTTClient.Builder()
             .con(this)
             .reconnection(true)
-            .host("117.135.58.188")  // 上海华为金桥项目-上研院-mqtt下发服务
-            .port(1883)  // 上海华为金桥项目-上研院-mqtt下发端口
-            .name("maintain")
-            .password("Cino#2018#")
+//            .host("117.135.58.188")  // 上海华为金桥项目-上研院-mqtt下发服务
+//            .port(1883)  // 上海华为金桥项目-上研院-mqtt下发端口
+//            .name("maintain")
+//            .password("Cino#2018#")
             .connect(object : MQTTClient.OnServiceDataListener {
                 override fun connect() {
                     Log.e(TAG, "连接成功")
