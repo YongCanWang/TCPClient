@@ -147,12 +147,17 @@ class MainActivity : AppCompatActivity() {
 
     fun onConnectMQTTService(view: View) {
         MQTTClient.Builder()
-            .con(this)
+            .cont(this)
+            .prefix(MQTTClient.Prefix.TCP)
             .reconnection(true)
 //            .host("117.135.58.188")  // 上海华为金桥项目-上研院-mqtt下发服务
 //            .port(1883)  // 上海华为金桥项目-上研院-mqtt下发端口
 //            .name("maintain")
 //            .password("Cino#2018#")
+            .host("47.101.168.108")  // 上海华为金桥项目-上研院-mqtt下发服务-测试时延上报
+            .port(1883)  // 上海华为金桥项目-上研院-mqtt下发端口-测试时延上报
+            .name("admin")
+            .password("admin")
             .connect(object : MQTTClient.OnServiceDataListener {
                 override fun connect() {
                     Log.e(TAG, "连接成功")
@@ -182,6 +187,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onPublishMessageToMQTTService(view: View) {
-        MQTTClient.publishMessage("topic_android_test", "你好，我来自Android客户端！！！", 2)
+//        MQTTClient.publishMessage("topic_android_test", "你好，我来自Android客户端！！！", 2)
+        MQTTClient.publishMessage(
+            "jinqiao/siwei/timedelay",
+            "\"{\"timeDelay\":10,\"timestamp\":1700000000000}\"",
+            2
+        )
     }
 }

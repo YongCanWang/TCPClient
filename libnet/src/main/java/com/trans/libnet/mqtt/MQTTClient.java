@@ -47,6 +47,7 @@ import java.util.Enumeration;
 public class MQTTClient {
     private static final String TAG = "MQTTClient";
     private static Context context;
+    private static Prefix prefix;
     private static final String serverURI = "ssl://z8ce6691.ala.cn-hangzhou.emqxsl.cn:8883"; // 连接成功-emqx使用服务地址
     //    private final String serverURI = "tcp://broker.emqx.io:1883"; // 连接成功-emqx测试地址
 //    private final String serverURI = "ssl://broker.emqx.io:8883"; // 连接成功-emqx测试地址
@@ -126,8 +127,17 @@ public class MQTTClient {
     private static void initMQTTClient(Context context) {
         try {
             if (mqttAndroidClient == null) {
+                String pref = "ssl://";
+                switch (prefix) {
+                    case SSL:
+                        pref = "ssl://";
+                        break;
+                    case TCP:
+                        pref = "tcp://";
+                        break;
+                }
                 mqttAndroidClient = new MqttAndroidClient(context,
-                        "ssl://" + hostname + ":" + port, clientId);
+                        pref + hostname + ":" + port, clientId);
                 mqttAndroidClient.setCallback(new MqttCallbackExtended() {
                     @Override
                     public void connectComplete(boolean reconnect, String serverURI) {
@@ -617,8 +627,13 @@ public class MQTTClient {
 
     public static class Builder {
 
-        public Builder con(Context con) {
-            MQTTClient.context = con;
+        public Builder cont(Context cont) {
+            MQTTClient.context = cont;
+            return this;
+        }
+
+        public Builder prefix(Prefix prefix) {
+            MQTTClient.prefix = prefix;
             return this;
         }
 
@@ -707,6 +722,11 @@ public class MQTTClient {
         TimedWaiting,
         Terminated,
 
+    }
+
+   public enum Prefix {
+        SSL,
+        TCP
     }
 
 }
