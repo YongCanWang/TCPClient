@@ -21,6 +21,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -54,7 +55,7 @@ public class SocketClient {
     private static int timeout = 3000; // 连接超时时间
     private static Socket socket;
     private static OnServiceDataListener onServiceDataListener;
-    public static final Gson gson = new Gson();
+    public  static final Gson gson = new Gson();
     private static boolean isSubPackage = false;
     private static final StringBuilder stringBuilder = new StringBuilder(); // 高效处理分包数据
     private static Thread thread;
@@ -290,6 +291,7 @@ public class SocketClient {
 
     /**
      * 数据信息写入本地
+     *
      * @param data
      */
     private static void writerLogInfo(String data) {
@@ -328,6 +330,36 @@ public class SocketClient {
                     socket.getOutputStream().write(msg.getBytes());
                     socket.getOutputStream().flush();
                     Log.e(TAG, "发送数据给服务端");
+                } catch (IOException e) {
+                    Log.e(TAG, "发送数据错误:" + e);
+                    e.printStackTrace();
+                }
+            }).start();
+        } else {
+            Log.e(TAG, "发送数据错误:连接失败");
+        }
+    }
+
+    public static void sendPathDataToService(String path) {
+        File file = new File(path);
+        if (file.exists()) {
+            Log.e(TAG, "sendPathDataToService: 目标文件存在:" + path);
+        } else {
+            Log.e(TAG, "sendPathDataToService: 目标文件不存在:" + path);
+        }
+        if (socket != null && socket.isConnected()) {
+            new Thread(() -> {
+                try {
+                    FileInputStream fileInputStream = new FileInputStream(path);
+                    byte[] bytes = new byte[1024 / 2];
+                    int readCount = 0;
+                    while ((readCount = fileInputStream.read(bytes)) != -1) {
+                        socket.getOutputStream().write(bytes, 0, readCount);
+                        socket.getOutputStream().flush();
+                        Log.e(TAG, "发送数据给服务端:" + new String(bytes, 0, readCount));
+                    }
+//                    socket.getOutputStream().write("END".getBytes());
+//                    socket.getOutputStream().flush();
                 } catch (IOException e) {
                     Log.e(TAG, "发送数据错误:" + e);
                     e.printStackTrace();

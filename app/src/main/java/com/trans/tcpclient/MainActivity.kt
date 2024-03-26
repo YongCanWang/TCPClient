@@ -1,6 +1,8 @@
 package com.trans.tcpclient
 
+import android.content.Intent
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -19,16 +21,36 @@ import com.trans.libnet.tcpclient.obu.OBU_TM
 import com.trans.libnet.tcpclient.obu.OBU_TPM
 import com.trans.libnet.tcpclient.obu.OBU_VIM
 import com.trans.libnet.udpclinet.DatagramSocketClient
+import com.trans.libnet.utils.PermissionsUtils
 import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
+    private lateinit var permissionsUtils: PermissionsUtils
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        permissionsUtils = PermissionsUtils.getInstance(this) {
+        }
+        permissionsUtils.checkSelfPermission()
+
         val ipv4Address = SocketClient.getIPAddress(this)
         Log.e(TAG, "IP地址:$ipv4Address")
         findViewById<TextView>(R.id.tv_ip).text = "IP: $ipv4Address"
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        permissionsUtils.onActivityResult(requestCode)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        permissionsUtils.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     fun onStartTCPClient(view: View) {
@@ -129,8 +151,8 @@ class MainActivity : AppCompatActivity() {
             })
 //            .hostname("192.168.10.123")
 //            .port(7130)
-            .hostname("172.19.251.46")
-            .port(8888)
+            .hostname("172.19.251.103")
+            .port(8080)
             .hz(30)
             .log(true)
             .reconnection(false)
@@ -138,7 +160,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onSendTCPDataToService(view: View) {
-        SocketClient.sendDataToService("Hello,我是TCP数据,我来自客户端")
+        val rootPath = Environment.getExternalStorageDirectory().absolutePath + "/trans/textFile"
+//        val rootPath = getExternalFilesDir(null)?.absolutePath+ "/trans/textFile"  // 包名下路径
+//        SocketClient.sendDataToService("Hello,我是TCP数据,我来自客户端")
+        SocketClient.sendPathDataToService("$rootPath/4922.json")
     }
 
     fun onSendUDPDataToService(view: View) {
