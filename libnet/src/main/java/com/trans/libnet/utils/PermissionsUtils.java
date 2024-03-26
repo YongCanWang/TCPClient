@@ -22,10 +22,10 @@ public class PermissionsUtils {
     private static PermissionsUtils INSTANCE = new PermissionsUtils();
     // 要申请的权限
     private String[] permissions = {
-            Manifest.permission.INTERNET,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS,
+            Manifest.permission.INTERNET,
             "android.permission.MANAGE_EXTERNAL_STORAGE",
             "android.permission.READ_MEDIA_IMAGES",
             "android.permission.READ_MEDIA_AUDIO",

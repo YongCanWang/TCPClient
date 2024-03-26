@@ -142,7 +142,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun error(e: IOException?) {
-                    Log.e(TAG, "接受数据错误:$e")
+                    Log.e(TAG, "接收数据错误:$e")
                 }
 
                 override fun connectionFail(e: Exception?) {
