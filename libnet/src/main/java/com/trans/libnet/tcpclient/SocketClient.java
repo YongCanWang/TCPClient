@@ -55,7 +55,7 @@ public class SocketClient {
     private static int timeout = 3000; // 连接超时时间
     private static Socket socket;
     private static OnServiceDataListener onServiceDataListener;
-    public  static final Gson gson = new Gson();
+    public static final Gson gson = new Gson();
     private static boolean isSubPackage = false;
     private static final StringBuilder stringBuilder = new StringBuilder(); // 高效处理分包数据
     private static Thread thread;
@@ -77,20 +77,20 @@ public class SocketClient {
                 handler.sendEmptyMessage(10007);
                 lifecycleStatus = LifecycleStatus.Running;
                 //socket=new Socket("192.168.1.102", 12345);//注意这里
-                Log.e(TAG, "Init");
+                Log.i(TAG, "Init");
                 socket = new Socket();
-                Log.e(TAG, "Start");
+                Log.i(TAG, "Start");
                 SocketAddress socAddress = new InetSocketAddress(hostname, port);
-                Log.e(TAG, "启动客户端:正在与服务器(" + hostname + ")建立连接......");
+                Log.i(TAG, "启动客户端:正在与服务器(" + hostname + ")建立连接......");
                 socket.connect(socAddress, timeout);//超时5秒
-                Log.e(TAG, "连接服务器成功(超时值" + timeout + "ms)");  // 连接服务器成功，并进入阻塞状态...
+                Log.i(TAG, "连接服务器成功(超时值" + timeout + "ms)");  // 连接服务器成功，并进入阻塞状态...
                 handler.sendEmptyMessage(10001);
                 // 监听服务端
                 getServiceData();
                 // 发送数据到客户端
 //                sendACKData(); // 代码不执行
             } catch (Exception e) {
-                Log.e(TAG, "连接服务器错误:" + e);
+                Log.i(TAG, "连接服务器错误:" + e);
                 handler.sendMessage(handler.obtainMessage(10005, e));
                 e.printStackTrace();
                 // 重新连接服务器
@@ -106,7 +106,7 @@ public class SocketClient {
     private static synchronized void getServiceData() {
         InputStream inputStream;
         try {
-            Log.e(TAG, "正在监听服务器(" + hostname + "):" + port + "端口......");
+            Log.i(TAG, "正在监听服务器(" + hostname + "):" + port + "端口......");
 //            PrintWriter pw = new PrintWriter(socket.getOutputStream());
             inputStream = socket.getInputStream();
             byte[] buffer = new byte[1024 * 2];
@@ -115,7 +115,7 @@ public class SocketClient {
             while ((len = inputStream.read(buffer)) != -1) {
 //                if (System.currentTimeMillis() - lastTime < hz
 //                        && stringBuilder.length() == 0) {   // TODO 有可能过滤掉重要数据,比如解除预警数据
-//                    Log.e(TAG, "帧率过快(" + hz + "),数据被过滤:" +  new String(buffer, 0, len));
+//                    Log.i(TAG, "帧率过快(" + hz + "),数据被过滤:" +  new String(buffer, 0, len));
 //                    continue;
 //                }
 
@@ -130,20 +130,20 @@ public class SocketClient {
 //                 handler.sendMessage(handler.obtainMessage(10006,
 //                        new String(buffer, 0, len)));
             }
-//            Log.e(TAG, "datas:" + datas);
-            Log.e(TAG, "客户端-服务器: 断开连接");
+//            Log.i(TAG, "datas:" + datas);
+            Log.i(TAG, "客户端-服务器: 断开连接");
 //            pw.close();
         } catch (IOException e) {
-            Log.e(TAG, "接收服务端数据错误:" + e);
+            Log.i(TAG, "接收服务端数据错误:" + e);
             handler.sendMessage(handler.obtainMessage(10004, e));
         } finally {
-            Log.e(TAG, "End");
+            Log.i(TAG, "End");
             if (bufferedWriter != null) {
                 try {
                     bufferedWriter.close();
                     bufferedWriter = null;
                 } catch (IOException e) {
-                    Log.e(TAG, "关闭io错误:" + e);
+                    Log.i(TAG, "关闭io错误:" + e);
                     throw new RuntimeException(e);
                 }
             }
@@ -163,13 +163,13 @@ public class SocketClient {
         // reconnection
         if (isReconnection) {
             try {
-                Log.e(TAG, "1s后重新连接服务器......");
+                Log.i(TAG, "1s后重新连接服务器......");
                 lifecycleStatus = LifecycleStatus.Waiting;
                 thread.sleep(millis);
-                Log.e(TAG, "开始重新连接服务器");
+                Log.i(TAG, "开始重新连接服务器");
                 net.run();   // reconnection
             } catch (InterruptedException e) {
-                Log.e(TAG, "休眠线程出错:" + e);
+                Log.i(TAG, "休眠线程出错:" + e);
             }
         } else {
             lifecycleStatus = LifecycleStatus.Terminated;
@@ -184,7 +184,7 @@ public class SocketClient {
      */
     private static void handlerData(byte[] buffer, int len) {
         String data = new String(buffer, 0, len).trim();
-        Log.e(TAG, "收到服务端数据:" + data);
+        Log.i(TAG, "收到服务端数据:" + data);
         if (isJson(data) && !isSubPackage) {
             handler.sendMessage(handler.obtainMessage(10002, data.trim()));
         } else { // 分包处理
@@ -226,7 +226,7 @@ public class SocketClient {
      * @param data
      */
     private static synchronized void handlerData2(String data) {
-        Log.e(TAG, "收到服务端数据:" + data);
+        Log.i(TAG, "收到服务端数据:" + data);
         writerLogInfo(data);
         boolean contains = data.contains(endSymbol);
         if (contains) {
@@ -267,7 +267,7 @@ public class SocketClient {
                     if (isJson(dataJson)) {
                         handler.sendMessage(handler.obtainMessage(10002, dataJson));
                     } else {
-                        Log.e(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson);
+                        Log.i(TAG, "handlerData2: 数据不完整,已丢弃:" + dataJson);
                     }
                 }
 
@@ -306,7 +306,7 @@ public class SocketClient {
                     bufferedIndex = 0;
                 }
             } catch (IOException e) {
-                Log.e(TAG, "写入日志错误:" + e);
+                Log.i(TAG, "写入日志错误:" + e);
                 throw new RuntimeException(e);
             }
         }
@@ -329,23 +329,25 @@ public class SocketClient {
                 try {
                     socket.getOutputStream().write(msg.getBytes());
                     socket.getOutputStream().flush();
-                    Log.e(TAG, "发送数据给服务端");
+                    socket.getOutputStream().write(endSymbol.getBytes());  // 结束符
+                    socket.getOutputStream().flush();
+                    Log.i(TAG, "发送数据给服务端");
                 } catch (IOException e) {
-                    Log.e(TAG, "发送数据错误:" + e);
+                    Log.i(TAG, "发送数据错误:" + e);
                     e.printStackTrace();
                 }
             }).start();
         } else {
-            Log.e(TAG, "发送数据错误:连接失败");
+            Log.i(TAG, "发送数据错误:连接失败");
         }
     }
 
     public static void sendPathDataToService(String path) {
         File file = new File(path);
         if (file.exists()) {
-            Log.e(TAG, "sendPathDataToService: 目标文件存在:" + path);
+            Log.i(TAG, "sendPathDataToService: 目标文件存在:" + path);
         } else {
-            Log.e(TAG, "sendPathDataToService: 目标文件不存在:" + path);
+            Log.i(TAG, "sendPathDataToService: 目标文件不存在:" + path);
         }
         if (socket != null && socket.isConnected()) {
             new Thread(() -> {
@@ -356,17 +358,17 @@ public class SocketClient {
                     while ((readCount = fileInputStream.read(bytes)) != -1) {
                         socket.getOutputStream().write(bytes, 0, readCount);
                         socket.getOutputStream().flush();
-                        Log.e(TAG, "发送数据给服务端:" + new String(bytes, 0, readCount));
+                        Log.i(TAG, "发送数据给服务端:" + new String(bytes, 0, readCount));
                     }
-//                    socket.getOutputStream().write("END".getBytes());
-//                    socket.getOutputStream().flush();
+                    socket.getOutputStream().write(endSymbol.getBytes());  // 结束符
+                    socket.getOutputStream().flush();
                 } catch (IOException e) {
-                    Log.e(TAG, "发送数据错误:" + e);
+                    Log.i(TAG, "发送数据错误:" + e);
                     e.printStackTrace();
                 }
             }).start();
         } else {
-            Log.e(TAG, "发送数据错误:连接失败");
+            Log.i(TAG, "发送数据错误:连接失败");
         }
     }
 
@@ -377,22 +379,22 @@ public class SocketClient {
         //发送给服务端的消息
         String msg = "Hello,我来自客户端(ACK)";
         try {
-            Log.e(TAG, "发送回执数据......");
+            Log.i(TAG, "发送回执数据......");
             //获取输出流并实例化
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             out.write(msg + "\n");//防止粘包
             out.flush();//不加这个flush会怎样？
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e(TAG, "发送回执数据错误:" + e);
+            Log.i(TAG, "发送回执数据错误:" + e);
         } finally {
             //关闭Socket
             try {
                 socket.close();
             } catch (IOException e) {
-                Log.e(TAG, "关闭客户端错误:" + e);
+                Log.i(TAG, "关闭客户端错误:" + e);
             }
-            Log.e(TAG, "客户端关闭");
+            Log.i(TAG, "客户端关闭");
         }
     }
 
@@ -468,7 +470,7 @@ public class SocketClient {
         if (thread != null) {
             thread.interrupt();
             thread = null;
-            Log.e(TAG, "disconnect: 中断线程");
+            Log.i(TAG, "disconnect: 中断线程");
         }
     }
 
@@ -522,7 +524,7 @@ public class SocketClient {
             }
         } else {
             //当前无网络连接,请在设置中打开网络
-            Log.e(TAG, "无网络，请先连接网络");
+            Log.i(TAG, "无网络，请先连接网络");
         }
         return null;
     }
@@ -554,14 +556,14 @@ public class SocketClient {
             String next = keys.next();
             jsonObject = null;
             keys = null;
-            Log.e(TAG, "getOBUType: " + next); // RSM
+            Log.i(TAG, "getOBUType: " + next); // RSM
 
 //            JsonParser jsonParser = new JsonParser();
 //            JsonElement parse = jsonParser.parse(dataKey);
 //            Set<String> strings1 = parse.getAsJsonObject().keySet();
-//            Log.e(TAG, "getOBUType: " + strings1);  //[RSM]
+//            Log.i(TAG, "getOBUType: " + strings1);  //[RSM]
 //            if (parse.isJsonNull() || !parse.isJsonObject()) {
-//                Log.e(TAG, "not json data");
+//                Log.i(TAG, "not json data");
 //                return "not json data";
 //            }
 
@@ -569,16 +571,16 @@ public class SocketClient {
 //            jsonObject2.add("jsonKey", parse);
 //            Set<String> strings2 = jsonObject2.keySet();
 //            String next1 = strings2.iterator().next();
-//            Log.e(TAG, "getOBUType: " + next1); // jsonKey
+//            Log.i(TAG, "getOBUType: " + next1); // jsonKey
 //
 //            Map<String, JsonElement> stringJsonElementMap = jsonObject2.asMap();
 //            Set<String> strings = stringJsonElementMap.keySet();
 //            String next2 = strings.iterator().next();
-//            Log.e(TAG, "getOBUType: " + next2); // jsonKey
+//            Log.i(TAG, "getOBUType: " + next2); // jsonKey
 
             return next;
         } catch (JSONException e) {
-            Log.e(TAG, "getOBUType:获取OBU数据类型错误 ---> JSONException:" + e);
+            Log.i(TAG, "getOBUType:获取OBU数据类型错误 ---> JSONException:" + e);
             e.printStackTrace();
         }
         return "";
@@ -628,7 +630,7 @@ public class SocketClient {
                 try {
                     file.mkdirs();
                 } catch (Exception e) {
-                    Log.e(TAG, "创建日志文件夹错误:" + e);
+                    Log.i(TAG, "创建日志文件夹错误:" + e);
                     throw new RuntimeException(e);
                 }
             }
@@ -639,14 +641,14 @@ public class SocketClient {
                     communicationFile.createNewFile();
                 }
             } catch (IOException e) {
-                Log.e(TAG, "创建日志文件错误:" + e);
+                Log.i(TAG, "创建日志文件错误:" + e);
             }
 
             try {
                 bufferedWriter = new BufferedWriter(
                         new OutputStreamWriter(new FileOutputStream(communicationFile, true)));
             } catch (FileNotFoundException e) {
-                Log.e(TAG, "找不到日志文件:" + e);
+                Log.i(TAG, "找不到日志文件:" + e);
                 throw new RuntimeException(e);
             }
         }
@@ -665,7 +667,7 @@ public class SocketClient {
 
     public static class Builder {
 
-        public Builder hostname(String ip) {
+        public Builder host(String ip) {
             SocketClient.hostname = ip;
             return this;
         }
@@ -680,6 +682,11 @@ public class SocketClient {
             return this;
         }
 
+        public Builder endSymbol(String symbol) {
+            SocketClient.endSymbol = symbol;
+            return this;
+        }
+
         public Builder reconnection(boolean isReconnection) {
             SocketClient.isReconnection = isReconnection;
             return this;
@@ -689,7 +696,7 @@ public class SocketClient {
             try {
                 SocketClient.logEnabled(enabled);
             } catch (Exception e) {
-                Log.e(TAG, "logEnabled:" + e);
+                Log.i(TAG, "logEnabled:" + e);
                 e.printStackTrace();
             }
             return this;
