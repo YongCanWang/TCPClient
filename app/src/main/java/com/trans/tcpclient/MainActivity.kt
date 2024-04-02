@@ -149,9 +149,9 @@ class MainActivity : AppCompatActivity() {
                     Log.e(TAG, "连接服务器错误:$e")
                 }
             })
-//            .hostname("192.168.10.123")
+//            .host("192.168.10.123")
 //            .port(7130)
-            .hostname("172.19.251.103")
+            .host("172.19.251.103")
             .port(8080)
             .hz(30)
             .log(true)
