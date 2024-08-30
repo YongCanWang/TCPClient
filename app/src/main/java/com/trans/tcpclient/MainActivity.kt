@@ -6,6 +6,7 @@ import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.trans.libnet.mqtt.MQTTClient
 import com.trans.libnet.tcpclient.SocketClient
@@ -22,11 +23,101 @@ import com.trans.libnet.tcpclient.obu.OBU_TPM
 import com.trans.libnet.tcpclient.obu.OBU_VIM
 import com.trans.libnet.udpclinet.DatagramSocketClient
 import com.trans.libnet.utils.PermissionsUtils
+import com.trans.libnet.utils.Utils
 import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
     private lateinit var permissionsUtils: PermissionsUtils
+
+    /**
+     * 构建者模式
+     */
+    private val mSocketClient = SocketClient.Builder()
+        .listener(object : OnServiceDataListener {
+            override fun connect() {
+                Log.e(TAG, "连接成功")
+            }
+
+            override fun connecting() {
+                Log.e(TAG, "正在连接")
+            }
+
+            override fun receive(data: String?) {
+//                Toast.makeText(this@MainActivity, "data",Toast.LENGTH_LONG).show()
+//                Log.e(TAG, "收到服务端数据:$data")
+                try {
+                    when (Utils.getOBUType(data)) {
+                        Constants.HEART -> {
+                            val heart = Utils.mGson.fromJson(data, OBU_HEART::class.java)
+                            Log.e(TAG, "receive: HEART:" + heart.heart.id)
+                        }
+
+                        Constants.BSM -> {
+                            val bsm = Utils.mGson.fromJson(data, OBU_BSM::class.java)
+                            Log.e(TAG, "receive: BSM:$bsm")
+                        }
+
+                        Constants.MAP -> {
+                            val map = Utils.mGson.fromJson(data, OBU_MAP::class.java)
+                            Log.e(TAG, "receive: MAP:$map")
+                        }
+
+                        Constants.RSI -> {
+                            val rsi = Utils.mGson.fromJson(data, OBU_RSI::class.java)
+                            Log.e(TAG, "receive: RSI:$rsi")
+                        }
+
+                        Constants.RSM -> {
+                            val rsm = Utils.mGson.fromJson(data, OBU_RSM::class.java)
+                            Log.e(TAG, "receive: RSM:$rsm")
+                        }
+
+                        Constants.SPAT -> {
+                            val spat = Utils.mGson.fromJson(data, OBU_SPAT::class.java)
+                            Log.e(TAG, "receive: SPAT:$spat")
+                        }
+
+                        Constants.TPM -> {
+                            val tpm = Utils.mGson.fromJson(data, OBU_TPM::class.java)
+//                            Log.e(TAG, "receive: TPM:$tpm")
+                        }
+
+                        Constants.VIM -> {
+                            val vim = Utils.mGson.fromJson(data, OBU_VIM::class.java)
+                            Log.e(TAG, "receive: VIM:$vim")
+                        }
+
+                        Constants.TM -> {
+                            val tm = Utils.mGson.fromJson(data, OBU_TM::class.java)
+                            Log.e(TAG, "receive: TM:$tm")
+                        }
+
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "receive: 数据解析错误:$e")
+                }
+            }
+
+            override fun offline() {
+                Log.e(TAG, "断开连接")
+            }
+
+            override fun error(e: IOException?) {
+                Log.e(TAG, "接收数据错误:$e")
+            }
+
+            override fun connectionFail(e: Exception?) {
+                Log.e(TAG, "连接服务器错误:$e")
+            }
+        })
+        .host("172.19.250.40")
+        .port(7180)
+        .hz(30)
+        .log(false)
+        .reconnection(true)
+        .build()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -34,7 +125,7 @@ class MainActivity : AppCompatActivity() {
         }
         permissionsUtils.checkSelfPermission()
 
-        val ipv4Address = SocketClient.getIPAddress(this)
+        val ipv4Address = Utils.getDeviceAddress(this)
         Log.e(TAG, "IP地址:$ipv4Address")
         findViewById<TextView>(R.id.tv_ip).text = "IP: $ipv4Address"
     }
@@ -68,102 +159,18 @@ class MainActivity : AppCompatActivity() {
 //        SocketClient.logEnabled(true)
 //        SocketClient.isReconnection(false)
 //        SocketClient.connect()
+        mSocketClient?.connect()
+    }
 
-        /**
-         * 构建者模式
-         */
-        SocketClient.Builder()
-            .listener(object : OnServiceDataListener {
-                override fun connect() {
-                    Log.e(TAG, "连接成功")
-                }
-
-                override fun connecting() {
-                    Log.e(TAG, "正在连接")
-                }
-
-                override fun receive(data: String?) {
-                    Log.e(TAG, "收到服务端数据:$data")
-                    try {
-                        when (SocketClient.getOBUType(data)) {
-                            Constants.HEART -> {
-                                val heart = SocketClient.gson.fromJson(data, OBU_HEART::class.java)
-                                Log.e(TAG, "receive: HEART:" + heart.heart.id)
-                            }
-
-                            Constants.BSM -> {
-                                val bsm = SocketClient.gson.fromJson(data, OBU_BSM::class.java)
-                                Log.e(TAG, "receive: BSM:$bsm")
-                            }
-
-                            Constants.MAP -> {
-                                val map = SocketClient.gson.fromJson(data, OBU_MAP::class.java)
-                                Log.e(TAG, "receive: MAP:$map")
-                            }
-
-                            Constants.RSI -> {
-                                val rsi = SocketClient.gson.fromJson(data, OBU_RSI::class.java)
-                                Log.e(TAG, "receive: RSI:$rsi")
-                            }
-
-                            Constants.RSM -> {
-                                val rsm = SocketClient.gson.fromJson(data, OBU_RSM::class.java)
-                                Log.e(TAG, "receive: RSM:$rsm")
-                            }
-
-                            Constants.SPAT -> {
-                                val spat = SocketClient.gson.fromJson(data, OBU_SPAT::class.java)
-                                Log.e(TAG, "receive: SPAT:$spat")
-                            }
-
-                            Constants.TPM -> {
-                                val tpm = SocketClient.gson.fromJson(data, OBU_TPM::class.java)
-                                Log.e(TAG, "receive: TPM:$tpm")
-                            }
-
-                            Constants.VIM -> {
-                                val vim = SocketClient.gson.fromJson(data, OBU_VIM::class.java)
-                                Log.e(TAG, "receive: VIM:$vim")
-                            }
-
-                            Constants.TM -> {
-                                val tm = SocketClient.gson.fromJson(data, OBU_TM::class.java)
-                                Log.e(TAG, "receive: TM:$tm")
-                            }
-
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "receive: 数据解析错误:$e")
-                    }
-                }
-
-                override fun offline() {
-                    Log.e(TAG, "断开连接")
-                }
-
-                override fun error(e: IOException?) {
-                    Log.e(TAG, "接收数据错误:$e")
-                }
-
-                override fun connectionFail(e: Exception?) {
-                    Log.e(TAG, "连接服务器错误:$e")
-                }
-            })
-//            .host("192.168.10.123")
-//            .port(7130)
-            .host("172.19.251.103")
-            .port(8080)
-            .hz(30)
-            .log(true)
-            .reconnection(false)
-            .connect()
+    fun onDisconnectTCPClient(view: View) {
+        mSocketClient?.disconnect()
     }
 
     fun onSendTCPDataToService(view: View) {
         val rootPath = Environment.getExternalStorageDirectory().absolutePath + "/trans/textFile"
 //        val rootPath = getExternalFilesDir(null)?.absolutePath+ "/trans/textFile"  // 包名下路径
-//        SocketClient.sendDataToService("Hello,我是TCP数据,我来自客户端")
-        SocketClient.sendPathDataToService("$rootPath/4922.json")
+//        mSocketClient.sendMessage("Hello,我是TCP数据,我来自客户端")
+        mSocketClient?.sendPathMessage("$rootPath/NaviInfo-1684833106133.json")
     }
 
     fun onSendUDPDataToService(view: View) {
@@ -201,7 +208,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun error(e: IOException?) {
-                    Log.e(TAG, "接受数据错误:$e")
+                    Log.e(TAG, "接收数据错误:$e")
                 }
 
                 override fun connectionFail(e: Exception?) {
@@ -218,5 +225,10 @@ class MainActivity : AppCompatActivity() {
             "\"{\"timeDelay\":10,\"timestamp\":1700000000000}\"",
             2
         )
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mSocketClient?.disconnect()
     }
 }
