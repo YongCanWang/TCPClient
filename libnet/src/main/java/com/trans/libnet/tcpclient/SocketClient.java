@@ -31,6 +31,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Tom灿
  * @description: TCP通信客户端 要求在同一局域网下(同一网段)
+ *               TCP网络传输协议特性
+ *                          ①安全的（确认应答机制，重发控制）
+ *                          ②有序的（顺序控制）
+ *                          ③高效的（效率高）（流量控制&拥塞控制机制，提高网络利用率）
  * @mDate :2023/5/25 9:24
  */
 public class SocketClient {
@@ -82,11 +86,11 @@ public class SocketClient {
         try {
             mLifecycle = Lifecycle.Runnable;
             if (mOnServiceDataListener != null) mOnServiceDataListener.connecting();
-            Log.i(TAG, "init");
+            Log.d(TAG, "init");
             mSocket = new Socket();
-            Log.i(TAG, "start");
+            Log.d(TAG, "start");
             SocketAddress socAddress = new InetSocketAddress(mHost, mPort);
-            Log.i(TAG, "启动client:正在与server("
+            Log.d(TAG, "启动client:正在与server("
                     + mHost + ")建立连接(超时值" + mTimeout + "ms)......");
             if (mIsDisconnect) {
                 mLifecycle = Lifecycle.Terminated;
@@ -95,7 +99,7 @@ public class SocketClient {
             }
             mSocket.connect(socAddress, mTimeout);//超时5秒
             mLifecycle = Lifecycle.Running;
-            Log.i(TAG, "连接server成功");
+            Log.d(TAG, "连接server成功");
             // 连接server成功，并进入阻塞状态...
             initHandlerThread();
             sendMes(10001);
@@ -171,7 +175,7 @@ public class SocketClient {
             return;
         }
         try {
-            Log.i(TAG, mMillis + "ms后重新连接server......");
+            Log.d(TAG, mMillis + "ms后重新连接server......");
             mLifecycle = Lifecycle.Waiting;
             /**
              * mConnectThread线程等待
@@ -180,7 +184,7 @@ public class SocketClient {
             mConnectThread.awaitTermination(mMillis, TimeUnit.MILLISECONDS);
             restart();
         } catch (InterruptedException e) {
-            Log.i(TAG, "wait error: " + e); // 在等待时，线程被Interrupt
+            Log.e(TAG, "wait error: " + e); // 在等待时，线程被Interrupt
             restart();
         }
     }
@@ -193,7 +197,7 @@ public class SocketClient {
             mLifecycle = Lifecycle.Terminated;
             return;
         }
-        Log.i(TAG, "start reconnect server");
+        Log.d(TAG, "start reconnect server");
         connect();
     }
 
@@ -204,7 +208,7 @@ public class SocketClient {
      */
     private void handlerData(String data) {
         if (data.isEmpty()) return;
-        Log.d(TAG, "receive server message:" + data);
+        Log.d(TAG, "handler server message:" + data);
         writerLogInfo(data); // TODO 需要单独开线程处理
         boolean contains = data.contains(mEndSymbol);
         if (contains) {
@@ -268,29 +272,6 @@ public class SocketClient {
     }
 
     /**
-     * 数据信息写入本地
-     *
-     * @param data
-     */
-    private void writerLogInfo(String data) {
-        if (mLogEnabled && mBufferedWriter != null) {
-            try {
-                Date date = Utils.Companion.getMDate();
-                date.setTime(System.currentTimeMillis());
-                mBufferedWriter.write(Utils.Companion.getMSimpleDateFormat().format(date) + " ");
-                mBufferedWriter.write(data);
-                mBufferedWriter.write("\r\n");
-                if (++mBufferedIndex % mDiskWriteHz == 0) { // 避免高频率的访问本地磁盘，造成卡顿
-                    mBufferedWriter.flush();
-                    mBufferedIndex = 0;
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "日志写入错误:" + e);
-            }
-        }
-    }
-
-    /**
      * 发送数据到服务端
      *
      * @param msg
@@ -315,18 +296,19 @@ public class SocketClient {
             outputStream.flush();
             outputStream.write(mEndSymbol.getBytes());  // 结束符
             outputStream.flush();
-            Log.i(TAG, "数据发送完毕");
+            Log.d(TAG, "数据发送完毕");
         } catch (IOException e) {
             Log.e(TAG, "send message error:" + e);
-        } finally {
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "close" + e);
-                }
-            }
         }
+//        finally {
+//            if (outputStream != null) {
+//                try {
+//                    outputStream.close();   // socket的输出流不能关闭，调用close方法后，socket链接会断开
+//                } catch (IOException e) {
+//                    Log.e(TAG, "close" + e);
+//                }
+//            }
+//        }
     }
 
     /**
@@ -374,13 +356,13 @@ public class SocketClient {
             }
             outputStream.write(mEndSymbol.getBytes());  // 结束符
             outputStream.flush();
-            Log.i(TAG, "send data finish");
+            Log.d(TAG, "send data finish");
         } catch (IOException e) {
             Log.e(TAG, "send message error:" + e);
         } finally {
 //            if (outputStream != null) {
 //                try {
-//                    outputStream.close();
+//                    outputStream.close();  // socket的输出流不能关闭，调用close方法后，socket链接会断开
 //                } catch (IOException e) {
 //                    Log.e(TAG, "close:" + e);
 //                }
@@ -402,7 +384,7 @@ public class SocketClient {
         //发送给服务端的消息
         String msg = "Hello,我来自client(ACK)";
         try {
-            Log.i(TAG, "发送回执数据......");
+            Log.d(TAG, "发送回执数据......");
             //获取输出流并实例化
             BufferedWriter out = new BufferedWriter(
                     new OutputStreamWriter(mSocket.getOutputStream()));
@@ -450,6 +432,19 @@ public class SocketClient {
     private Boolean isSocketConnect() {
         return mSocket != null && mSocket.isConnected() && !mSocket.isClosed()
                 && !mSocket.isOutputShutdown();
+    }
+
+    /**
+     * 断开连接后,是否重新连接server
+     *
+     * @param isReconnection
+     */
+    private void isReconnection(boolean isReconnection) {
+        mIsReconnection = isReconnection;
+    }
+
+    private boolean mIsSubPackage(String data) {
+        return !String.valueOf(data.charAt(data.length())).equals(mEndSymbol);
     }
 
     /**
@@ -621,20 +616,6 @@ public class SocketClient {
         quitHandlerThread();
     }
 
-    public interface OnServiceDataListener {
-        void connect();
-
-        void connecting();
-
-        void receive(String data);
-
-        void offline();
-
-        void error(IOException e);
-
-        void connectionFail(Exception e);
-    }
-
     /**
      * 是否开启本地日志记录: 需要动态申请本地读写权限
      * 本地日志路径:  /trans/record/communication_log.txt
@@ -672,16 +653,26 @@ public class SocketClient {
     }
 
     /**
-     * 断开连接后,是否重新连接server
+     * 数据信息写入本地
      *
-     * @param isReconnection
+     * @param data
      */
-    private void isReconnection(boolean isReconnection) {
-        mIsReconnection = isReconnection;
-    }
-
-    private boolean mIsSubPackage(String data) {
-        return !String.valueOf(data.charAt(data.length())).equals(mEndSymbol);
+    private void writerLogInfo(String data) {
+        if (mLogEnabled && mBufferedWriter != null) {
+            try {
+                Date date = Utils.Companion.getMDate();
+                date.setTime(System.currentTimeMillis());
+                mBufferedWriter.write(Utils.Companion.getMSimpleDateFormat().format(date) + " ");
+                mBufferedWriter.write(data);
+                mBufferedWriter.write("\r\n");
+                if (++mBufferedIndex % mDiskWriteHz == 0) { // 避免高频率的访问本地磁盘，造成卡顿
+                    mBufferedWriter.flush();
+                    mBufferedIndex = 0;
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "日志写入错误:" + e);
+            }
+        }
     }
 
     /**
@@ -745,6 +736,20 @@ public class SocketClient {
         public SocketClient build(OnServiceDataListener listener) {
             return listener(listener).build();
         }
+    }
+
+    public interface OnServiceDataListener {
+        void connect();
+
+        void connecting();
+
+        void receive(String data);
+
+        void offline();
+
+        void error(IOException e);
+
+        void connectionFail(Exception e);
     }
 
     /**

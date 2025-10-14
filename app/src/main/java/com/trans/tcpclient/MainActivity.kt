@@ -6,7 +6,6 @@ import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.trans.libnet.mqtt.MQTTClient
 import com.trans.libnet.tcpclient.SocketClient
@@ -21,7 +20,7 @@ import com.trans.libnet.tcpclient.obu.OBU_SPAT
 import com.trans.libnet.tcpclient.obu.OBU_TM
 import com.trans.libnet.tcpclient.obu.OBU_TPM
 import com.trans.libnet.tcpclient.obu.OBU_VIM
-import com.trans.libnet.udpclinet.DatagramSocketClient
+import com.trans.libnet.udpclinet.UDPClient
 import com.trans.libnet.utils.PermissionsUtils
 import com.trans.libnet.utils.Utils
 import java.io.IOException
@@ -29,6 +28,9 @@ import java.io.IOException
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
     private lateinit var permissionsUtils: PermissionsUtils
+    private val mHost = "192.168.1.43"
+    private var mPort: Int = 8080
+    private var mLocalPort: Int = 12345 // 本地端口
 
     /**
      * 构建者模式
@@ -111,11 +113,45 @@ class MainActivity : AppCompatActivity() {
                 Log.e(TAG, "连接服务器错误:$e")
             }
         })
-        .host("172.19.250.40")
-        .port(7180)
+        .host(mHost)
+        .port(mPort)
         .hz(30)
         .log(false)
         .reconnection(true)
+        .build()
+
+    private val mUDPClient = UDPClient.Builder()
+        .listener(object : UDPClient.OnServiceDataListener {
+            override fun listener() {
+                Log.e(TAG, "监听成功")
+            }
+
+            override fun listenering() {
+                Log.e(TAG, "正在监听")
+            }
+
+            override fun receive(data: String?) {
+                Log.e(TAG, "收到服务端数据:$data")
+
+            }
+
+            override fun offline() {
+                Log.e(TAG, "断开监听")
+            }
+
+            override fun error(e: IOException?) {
+                Log.e(TAG, "接收数据错误:$e")
+            }
+
+            override fun listenerFail(e: Exception?) {
+                Log.e(TAG, "监听本地端口错误:$e")
+            }
+        })
+        .host(mHost)
+        .remotePort(mPort)
+        .localPort(mLocalPort)
+        .log(false)
+        .reListener(true)
         .build()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -144,7 +180,7 @@ class MainActivity : AppCompatActivity() {
         permissionsUtils.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
-    fun onStartTCPClient(view: View) {
+    fun onConnectTCPService(view: View) {
         /**
          * 启动客户端前必须先启动服务端，否则会连接失败，报错误:
          * java.net.ConnectException: failed to connect to /172.19.250.161 (port 12345)
@@ -162,19 +198,29 @@ class MainActivity : AppCompatActivity() {
         mSocketClient?.connect()
     }
 
+    fun onSendDataToTCPService(view: View) {
+        val rootPath = Environment.getExternalStorageDirectory().absolutePath + "/trans/textFile"
+//        val rootPath = getExternalFilesDir(null)?.absolutePath+ "/trans/textFile"  // 包名下路径
+        mSocketClient.sendMessage("Hello,我是TCP数据,我来自Client")
+//        mSocketClient?.sendPathMessage("$rootPath/NaviInfo-1684833106133.json")
+    }
+
     fun onDisconnectTCPClient(view: View) {
         mSocketClient?.disconnect()
     }
 
-    fun onSendTCPDataToService(view: View) {
-        val rootPath = Environment.getExternalStorageDirectory().absolutePath + "/trans/textFile"
-//        val rootPath = getExternalFilesDir(null)?.absolutePath+ "/trans/textFile"  // 包名下路径
-//        mSocketClient.sendMessage("Hello,我是TCP数据,我来自客户端")
-        mSocketClient?.sendPathMessage("$rootPath/NaviInfo-1684833106133.json")
+    fun onUDPListenerLocalPort(view: View) {
+        mUDPClient.listener()
+//        DatagramSocketClient.listener()
     }
 
     fun onSendUDPDataToService(view: View) {
-        Thread(DatagramSocketClient.net).start()
+//        Thread(DatagramSocketClient.net).start()
+        mUDPClient.sendMessage("Hello,我是TCP数据,我来自Client")
+    }
+
+    fun onUDPDisconnectListenerLocalPort(view: View) {
+        mUDPClient.disconnect()
     }
 
     fun onConnectMQTTService(view: View) {

@@ -15,9 +15,10 @@ import java.net.InetAddress;
  */
 public class DatagramSocketClient {
     private static final String TAG = "DatagramSocketClient";
-    private static String ip = "172.19.250.161"; // IP
+    private static String ip = "192.168.1.43"; // IP
     //    private static String ip = "192.168.110.1"; // obu设备IP
-    private static int port = 56789; // 端口
+    private static int mServicePort = 8080; // 服务端端口
+    private static int mClientPort = 1234; // 客户端端口
 //    private static int port = 22; // 端口
 
     private static final int TIMEOUT = 3000;  // 阻塞时长
@@ -42,7 +43,7 @@ public class DatagramSocketClient {
             InetAddress inetAddress = InetAddress.getByName(ip);  // 设置IP
             byte[] dataBytes = data.getBytes();
             DatagramPacket dataPacket = new DatagramPacket(dataBytes, dataBytes.length,
-                    inetAddress, port); // 数据包: 设置ip、端口、数据
+                    inetAddress, mServicePort); // 数据包: 设置ip、端口、数据
             Log.e(TAG, "创建数据包:ip、端口、数据");
             DatagramSocket client = new DatagramSocket(); // Socket对象
             Log.e(TAG, "创建Socket对象");
@@ -78,5 +79,23 @@ public class DatagramSocketClient {
         }
     }
 
-
+    public static void listener() {
+        new Thread(() -> {
+            try {
+                DatagramSocket client = new DatagramSocket(mClientPort); // Socket对象 固定端口号
+                // 响应数据包
+                byte[] responseBytes = new byte[1024 * 2];
+                while (true) {
+                    DatagramPacket responsePacket = new DatagramPacket(responseBytes, responseBytes.length);
+                    Log.e(TAG, "正在监听......");
+                    client.receive(responsePacket);
+                    Log.e(TAG, "正在接收数据......");
+                    String response = new String(responseBytes, 0, responsePacket.getLength());
+                    Log.e(TAG, "接收响应数据成功:" + response);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "listener: " + e);
+            }
+        }).start();
+    }
 }

@@ -8,33 +8,50 @@
     tools:context=".MainActivity">
 
     <Button
-        android:onClick="onStartTCPClient"
+        android:onClick="onConnectTCPService"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start TCP Client"
+        android:text="Connect TCP Service"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:onClick="onSendDataToTCPService"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send Data To TCP Service"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:onClick="onDisconnectTCPClient"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Disconnect TCP Client"
+        android:text="Disconnect TCP Service"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-
     <Button
-        android:onClick="onSendTCPDataToService"
+        android:onClick="onUDPListenerLocalPort"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Send TCP Data To Service"
+        android:text="UDP Listener Local Port"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:onClick="onUDPDisconnectListenerLocalPort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="UDP Disconnect Listener Local Port"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
@@ -44,7 +61,6 @@
         android:text="Send UDP Data To Service"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
 
     <Button
         android:onClick="onConnectMQTTService"
