@@ -130,9 +130,8 @@ class MainActivity : AppCompatActivity() {
                 Log.e(TAG, "正在监听")
             }
 
-            override fun receive(data: String?) {
-                Log.e(TAG, "收到服务端数据:$data")
-
+            override fun receive(bytes: ByteArray?) {
+                Log.e(TAG, "收到服务端数据size:${bytes?.size}")
             }
 
             override fun offline() {
@@ -216,7 +215,7 @@ class MainActivity : AppCompatActivity() {
 
     fun onSendUDPDataToService(view: View) {
 //        Thread(DatagramSocketClient.net).start()
-        mUDPClient.sendMessage("Hello,我是TCP数据,我来自Client")
+        mUDPClient.sendMessage("Hello,我是UDP数据,我来自Client")
     }
 
     fun onUDPDisconnectListenerLocalPort(view: View) {

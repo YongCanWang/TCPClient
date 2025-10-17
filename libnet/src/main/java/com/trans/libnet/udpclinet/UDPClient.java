@@ -1,6 +1,5 @@
 package com.trans.libnet.udpclinet;
 
-
 import android.annotation.SuppressLint;
 import android.os.Environment;
 import android.os.Handler;
@@ -25,6 +24,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Date;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -84,9 +84,9 @@ public class UDPClient {
     private synchronized void startListener() {
         try {
             mLifecycle = Lifecycle.Runnable;
-            if (mOnServiceDataListener != null) mOnServiceDataListener.listener();
+            if (mOnServiceDataListener != null) mOnServiceDataListener.listenering();
             mSocket = new DatagramSocket(mClientPort); // Socket对象 绑定到指定本地的端口
-            int port = mSocket.getPort();
+//            int port = mSocket.getPort();
             Log.d(TAG, "init");
             // 设置接收数据时阻塞的最长时间
 //            mSocket.setSoTimeout(TIMEOUT);
@@ -102,19 +102,24 @@ public class UDPClient {
             sendMes(10001);
             Log.d(TAG, "开始监听" + mClientPort + "端口......");
             // 响应数据包
-            byte[] responseBytes = new byte[1024 * 2];
+            byte[] responseBytes = new byte[1024];
             while (!mIsDisconnect && mSocket != null) {
                 DatagramPacket responsePacket = new DatagramPacket(responseBytes, responseBytes.length);
                 try {
                     // 阻塞等待接收数据
                     mSocket.receive(responsePacket);
-                    String response = new String(responseBytes, 0, responsePacket.getLength());
-                    Log.i(TAG, "receive:" + response);
-                    if (!mDataHandlerThread.isShutdown()) {
-                        mDataHandlerThread.execute(() -> {
-                            handlerData(response);
-                        });
-                    }
+                    // 截取实际接收到的数据
+                    byte[] receivedData = Arrays.copyOfRange(
+                            responseBytes, 0, responsePacket.getLength());
+                    mOnServiceDataListener.receive(receivedData);
+
+//                    String response = new String(responseBytes, 0, responsePacket.getLength());
+//                    Log.i(TAG, "receive:" + response);
+//                    if (!mDataHandlerThread.isShutdown()) {
+//                        mDataHandlerThread.execute(() -> {
+//                            handlerData(response);
+//                        });
+//                    }
                 } catch (InterruptedIOException e) {
                     Log.i(TAG, "监听" + mClientPort + "端口超时:" + e);
                 }
@@ -189,14 +194,23 @@ public class UDPClient {
      * @param msg
      */
     public void sendMessage(String msg) {
+        sendMessage(msg.getBytes());
+    }
+
+    /**
+     * 发送数据到服务端
+     *
+     * @param dataBytes
+     */
+    public void sendMessage(byte[] dataBytes) {
         if (mSendDataThread.isShutdown()) {
             Log.i(TAG, "send message error: thread is shutdown");
             mSendDataThread = Executors.newSingleThreadExecutor();
         }
-        mSendDataThread.execute(() -> sendData(msg));
+        mSendDataThread.execute(() -> sendData(dataBytes));
     }
 
-    private void sendData(String msg) {
+    private void sendData(byte[] dataBytes) {
         if (isSocketClosed()) {
             Log.i(TAG, "socket is close");
             try {
@@ -209,7 +223,7 @@ public class UDPClient {
 
         try {
             InetAddress inetAddress = InetAddress.getByName(mHost);  // 设置IP
-            byte[] dataBytes = msg.getBytes();
+
             DatagramPacket dataPacket = new DatagramPacket(dataBytes, dataBytes.length,
                     inetAddress, mServicePort); // 数据包: 设置ip、端口、数据
             mSocket.send(dataPacket);
@@ -270,8 +284,8 @@ public class UDPClient {
                             break;
 
                         case 10002: // 收到数据
-                            if (mOnServiceDataListener != null)
-                                mOnServiceDataListener.receive((String) msg.obj);
+//                            if (mOnServiceDataListener != null)
+//                                mOnServiceDataListener.receive((String) msg.obj);
                             break;
 
                         case 10003: // 断开连接
@@ -418,7 +432,7 @@ public class UDPClient {
 
         void listenering();
 
-        void receive(String data);
+        void receive(byte[] bytes);
 
         void offline();
 
