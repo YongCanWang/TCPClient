@@ -83,28 +83,31 @@ public class UDPClient {
      */
     private synchronized void startListener() {
         try {
-            mLifecycle = Lifecycle.Runnable;
-            if (mOnServiceDataListener != null) mOnServiceDataListener.listenering();
-            mSocket = new DatagramSocket(mClientPort); // Socket对象 绑定到指定本地的端口
-//            int port = mSocket.getPort();
-            Log.d(TAG, "init");
-            // 设置接收数据时阻塞的最长时间
-//            mSocket.setSoTimeout(TIMEOUT);
-
             if (mIsDisconnect) {
                 mLifecycle = Lifecycle.Terminated;
                 Log.i(TAG, "task interrupt");
                 return;
             }
 
+            mLifecycle = Lifecycle.Runnable;
+            if (mOnServiceDataListener != null) mOnServiceDataListener.listenering();
+
+            mSocket = new DatagramSocket(mClientPort); // Socket对象 绑定到指定本地的端口
+//            int port = mSocket.getPort();
+            Log.d(TAG, "init");
+            // 设置接收数据时阻塞的最长时间
+//            mSocket.setSoTimeout(TIMEOUT);
+
             mLifecycle = Lifecycle.Running;
             initHandlerThread();
             sendMes(10001);
             Log.d(TAG, "开始监听" + mClientPort + "端口......");
+
             // 响应数据包
             byte[] responseBytes = new byte[1024];
+            DatagramPacket responsePacket = new DatagramPacket(responseBytes, responseBytes.length);
             while (!mIsDisconnect && mSocket != null) {
-                DatagramPacket responsePacket = new DatagramPacket(responseBytes, responseBytes.length);
+                Log.d(TAG, "receive......");
                 try {
                     // 阻塞等待接收数据
                     mSocket.receive(responsePacket);
@@ -121,7 +124,7 @@ public class UDPClient {
 //                        });
 //                    }
                 } catch (InterruptedIOException e) {
-                    Log.i(TAG, "监听" + mClientPort + "端口超时:" + e);
+                    Log.e(TAG, "监听" + mClientPort + "端口超时:" + e);
                 }
             }
             Log.i(TAG, "listener disconnect");
@@ -260,6 +263,28 @@ public class UDPClient {
      */
     private Boolean isSocketClosed() {
         return mSocket == null || mSocket.isClosed();
+    }
+
+    /**
+     * 端口是否可用
+     * @param port
+     * @return
+     */
+    public static boolean isPortAvailable(int port) {
+        DatagramSocket socket = null;
+        try {
+            socket = new DatagramSocket(port);
+            socket.close();
+            return true; // 端口未被占用
+        } catch (SocketException e) {
+            // 端口已被占用或无权访问该端口（需要管理员权限）
+            Log.e(TAG, "isPortAvailable:" + e);
+            return false;
+        } finally {
+            if (socket != null) {
+                socket.close();
+            }
+        }
     }
 
     /**

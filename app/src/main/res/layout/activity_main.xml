@@ -45,10 +45,28 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+        android:onClick="onUDPListenerLocalPort2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="UDP Listener Local Port2"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
         android:onClick="onUDPDisconnectListenerLocalPort"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="UDP Disconnect Listener Local Port"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:onClick="onUDPDisconnectListenerLocalPort2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="UDP Disconnect Listener Local Port2"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -80,7 +98,7 @@
 
     <TextView
         android:id="@+id/tv_ip"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="12dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 

@@ -153,6 +153,39 @@ class MainActivity : AppCompatActivity() {
         .reListener(true)
         .build()
 
+    private val mUDPClient2 = UDPClient.Builder()
+        .listener(object : UDPClient.OnServiceDataListener {
+            override fun listener() {
+                Log.e(TAG, "2监听成功")
+            }
+
+            override fun listenering() {
+                Log.e(TAG, "2正在监听")
+            }
+
+            override fun receive(bytes: ByteArray?) {
+                Log.e(TAG, "2收到服务端数据size:${bytes?.size}")
+            }
+
+            override fun offline() {
+                Log.e(TAG, "2断开监听")
+            }
+
+            override fun error(e: IOException?) {
+                Log.e(TAG, "2接收数据错误:$e")
+            }
+
+            override fun listenerFail(e: Exception?) {
+                Log.e(TAG, "2监听本地端口错误:$e")
+            }
+        })
+        .host(mHost)
+        .remotePort(mPort)
+        .localPort(mLocalPort)
+        .log(false)
+        .reListener(true)
+        .build()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -213,6 +246,11 @@ class MainActivity : AppCompatActivity() {
 //        DatagramSocketClient.listener()
     }
 
+    fun onUDPListenerLocalPort2(view: View) {
+        mUDPClient2.listener()
+//        DatagramSocketClient.listener()
+    }
+
     fun onSendUDPDataToService(view: View) {
 //        Thread(DatagramSocketClient.net).start()
         mUDPClient.sendMessage("Hello,我是UDP数据,我来自Client")
@@ -220,6 +258,10 @@ class MainActivity : AppCompatActivity() {
 
     fun onUDPDisconnectListenerLocalPort(view: View) {
         mUDPClient.disconnect()
+    }
+
+    fun onUDPDisconnectListenerLocalPort2(view: View) {
+        mUDPClient2.disconnect()
     }
 
     fun onConnectMQTTService(view: View) {
