@@ -127,6 +127,10 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun listener() {
+                Log.e(TAG, "正在监听")
+            }
+
+            override fun complete() {
                 Log.e(TAG, "监听成功")
             }
 
@@ -160,6 +164,10 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun listener() {
+                Log.e(TAG, "2正在监听")
+            }
+
+            override fun complete() {
                 Log.e(TAG, "2监听成功")
             }
 

@@ -333,7 +333,7 @@ public class UDPClient {
                     super.handleMessage(msg);
                     switch (msg.what) {
                         case 10001: // 连接成功
-                            if (mOnServiceDataListener != null) mOnServiceDataListener.listener();
+                            if (mOnServiceDataListener != null) mOnServiceDataListener.complete();
                             break;
 
                         case 10002: // 收到数据
@@ -502,6 +502,8 @@ public class UDPClient {
         void begin(); // 开始
 
         void listener();
+
+        void complete();
 
         void receive(byte[] bytes);
 
