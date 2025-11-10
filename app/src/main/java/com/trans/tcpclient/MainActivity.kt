@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
     private lateinit var permissionsUtils: PermissionsUtils
     private val mHost = "192.168.1.43"
-    private var mPort: Int = 8080
+    private var mPort: Int = 12345
     private var mLocalPort: Int = 12345 // 本地端口
 
     /**
@@ -122,12 +122,12 @@ class MainActivity : AppCompatActivity() {
 
     private val mUDPClient = UDPClient.Builder()
         .listener(object : UDPClient.OnServiceDataListener {
-            override fun listener() {
-                Log.e(TAG, "监听成功")
+            override fun begin() {
+                Log.e(TAG, "开始监听")
             }
 
-            override fun listenering() {
-                Log.e(TAG, "正在监听")
+            override fun listener() {
+                Log.e(TAG, "监听成功")
             }
 
             override fun receive(bytes: ByteArray?) {
@@ -155,12 +155,12 @@ class MainActivity : AppCompatActivity() {
 
     private val mUDPClient2 = UDPClient.Builder()
         .listener(object : UDPClient.OnServiceDataListener {
-            override fun listener() {
-                Log.e(TAG, "2监听成功")
+            override fun begin() {
+                Log.e(TAG, "2开始监听")
             }
 
-            override fun listenering() {
-                Log.e(TAG, "2正在监听")
+            override fun listener() {
+                Log.e(TAG, "2监听成功")
             }
 
             override fun receive(bytes: ByteArray?) {
@@ -242,18 +242,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onUDPListenerLocalPort(view: View) {
-        mUDPClient.listener()
-//        DatagramSocketClient.listener()
+        mUDPClient.receive()
     }
 
     fun onUDPListenerLocalPort2(view: View) {
-        mUDPClient2.listener()
-//        DatagramSocketClient.listener()
+        mUDPClient2.receive()
     }
 
     fun onSendUDPDataToService(view: View) {
 //        Thread(DatagramSocketClient.net).start()
-        mUDPClient.sendMessage("Hello,我是UDP数据,我来自Client")
+        mUDPClient.sendMessage("Hello,我是UDP数据1,我来自Client")
+//        mUDPClient2.sendMessage("Hello,我是UDP数据2,我来自Client")
     }
 
     fun onUDPDisconnectListenerLocalPort(view: View) {

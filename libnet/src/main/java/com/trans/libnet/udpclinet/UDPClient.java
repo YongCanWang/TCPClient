@@ -23,8 +23,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.Date;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -60,12 +60,12 @@ public class UDPClient {
     private long mMillis = 1000; // 1s后重新连接服务端口
     private String mDataHandlerThreadName = "data_handler_thread";
     private ExecutorService mConnectThread = Executors.newSingleThreadExecutor();
-    private ExecutorService mDataHandlerThread = Executors.newSingleThreadExecutor();
+//    private ExecutorService mDataHandlerThread = Executors.newSingleThreadExecutor();
     private ExecutorService mSendDataThread = Executors.newSingleThreadExecutor();
     private HandlerThread mDataDistributeThread;
     @SuppressLint("HandlerLeak")
     private Handler mDataDistributeHandler;
-    private final Runnable mRun = () -> startListener();
+    private final Runnable mRun = () -> executeReceive();
 
     UDPClient(Builder builder) {
         mHost = builder.mHost;
@@ -81,40 +81,51 @@ public class UDPClient {
     /**
      * 开始监听本地端口
      */
-    private synchronized void startListener() {
+    private synchronized void executeReceive() {
+        Log.d(TAG, "execute");
         try {
             if (mIsDisconnect) {
                 mLifecycle = Lifecycle.Terminated;
-                Log.i(TAG, "task interrupt");
+                Log.i(TAG, "task interrupted");
                 return;
             }
 
             mLifecycle = Lifecycle.Runnable;
-            if (mOnServiceDataListener != null) mOnServiceDataListener.listenering();
 
-            mSocket = new DatagramSocket(mClientPort); // Socket对象 绑定到指定本地的端口
+            if (mOnServiceDataListener != null) mOnServiceDataListener.begin();
+
+            Log.d(TAG, "begin");
+
+            // Socket对象 绑定到指定本地的端口
+            initSocket();
+
+            if (mSocket != null) {
+
 //            int port = mSocket.getPort();
-            Log.d(TAG, "init");
-            // 设置接收数据时阻塞的最长时间
+
+                Log.d(TAG, "ready");
+                // 设置接收数据时阻塞的最长时间
 //            mSocket.setSoTimeout(TIMEOUT);
 
-            mLifecycle = Lifecycle.Running;
-            initHandlerThread();
-            sendMes(10001);
-            Log.d(TAG, "开始监听" + mClientPort + "端口......");
+                initHandlerThread();
+                sendMes(10001);
+                Log.d(TAG, "receive port " + mClientPort);
 
-            // 响应数据包
-            byte[] responseBytes = new byte[1024];
-            DatagramPacket responsePacket = new DatagramPacket(responseBytes, responseBytes.length);
-            while (!mIsDisconnect && mSocket != null) {
-                Log.d(TAG, "receive......");
-                try {
-                    // 阻塞等待接收数据
-                    mSocket.receive(responsePacket);
-                    // 截取实际接收到的数据
-                    byte[] receivedData = Arrays.copyOfRange(
-                            responseBytes, 0, responsePacket.getLength());
-                    mOnServiceDataListener.receive(receivedData);
+                // 响应数据包
+                byte[] responseBytes = new byte[1024];
+//            DatagramPacket responsePacket = new DatagramPacket(responseBytes, responseBytes.length
+//            ,InetAddress.getByName("192.168.0.67"), mClientPort);
+                DatagramPacket responsePacket = new DatagramPacket(responseBytes, responseBytes.length);
+                mLifecycle = Lifecycle.Running;
+                while (!mIsDisconnect && mSocket != null) {
+                    Log.d(TAG, "receive......");
+                    try {
+                        // 阻塞等待接收数据
+                        mSocket.receive(responsePacket);
+                        // 截取实际接收到的数据
+                        byte[] receivedData = Arrays.copyOfRange(
+                                responseBytes, 0, responsePacket.getLength());
+                        mOnServiceDataListener.receive(receivedData);
 
 //                    String response = new String(responseBytes, 0, responsePacket.getLength());
 //                    Log.i(TAG, "receive:" + response);
@@ -123,37 +134,37 @@ public class UDPClient {
 //                            handlerData(response);
 //                        });
 //                    }
-                } catch (InterruptedIOException e) {
-                    Log.e(TAG, "监听" + mClientPort + "端口超时:" + e);
+                    } catch (InterruptedIOException e) {
+                        Log.e(TAG, "监听" + mClientPort + "端口超时:" + e);
+                    }
                 }
+                Log.i(TAG, "listener disconnect");
+            } else {
+                Log.d(TAG, "socket is null");
             }
-            Log.i(TAG, "listener disconnect");
         } catch (Exception e) {
-            Log.e(TAG, "port listener error: " + e);
-            finishSocket();
+            Log.e(TAG, "receive error: " + e);
             quitHandler(10005, e);
-            // 重新监听端口
-            reListener();
         } finally {
             Log.i(TAG, "end");
             finishSocket();
             quitHandler(10003, null);
             // 重新连接server
-            reListener();
+            reReceive();
         }
     }
 
     /**
      * 重新监听端口
      */
-    private synchronized void reListener() {
+    private synchronized void reReceive() {
         if (!mIsReListener
                 || mIsDisconnect || mConnectThread.isShutdown()) {  // 说明主动调用了disconnect方法
             mLifecycle = Lifecycle.Terminated;
             return;
         }
         try {
-            Log.d(TAG, mMillis + "ms后重新监听端口......");
+            Log.d(TAG, mMillis + "ms后重新receive端口......");
             mLifecycle = Lifecycle.Waiting;
             /**
              * mConnectThread线程等待
@@ -175,8 +186,8 @@ public class UDPClient {
             mLifecycle = Lifecycle.Terminated;
             return;
         }
-        Log.d(TAG, "start listener port");
-        listener();
+        Log.d(TAG, "start receive port");
+        startReceive();
     }
 
     /**
@@ -207,39 +218,54 @@ public class UDPClient {
      */
     public void sendMessage(byte[] dataBytes) {
         if (mSendDataThread.isShutdown()) {
-            Log.i(TAG, "send message error: thread is shutdown");
+            Log.d(TAG, "executor is shutdown");
             mSendDataThread = Executors.newSingleThreadExecutor();
+            Log.d(TAG, "new executor");
         }
         mSendDataThread.execute(() -> sendData(dataBytes));
     }
 
     private void sendData(byte[] dataBytes) {
-        if (isSocketClosed()) {
-            Log.i(TAG, "socket is close");
-            try {
-                mSocket = new DatagramSocket(mClientPort); // Socket对象 绑定到指定本地的端口
-                Log.i(TAG, "new socket");
-            } catch (SocketException e) {
-                Log.e(TAG, "sendData: " + e);
-            }
+        initSocket();
+        if (mSocket == null) {
+            Log.i(TAG, "socket is null");
+            return;
         }
 
         try {
-            InetAddress inetAddress = InetAddress.getByName(mHost);  // 设置IP
-
             DatagramPacket dataPacket = new DatagramPacket(dataBytes, dataBytes.length,
-                    inetAddress, mServicePort); // 数据包: 设置ip、端口、数据
+                    InetAddress.getByName(mHost), mServicePort); // 数据包: 设置ip、端口、数据
             mSocket.send(dataPacket);
         } catch (Exception e) {
             Log.e(TAG, "sendData: " + e);
         }
     }
 
+    private void initSocket() {
+        if (isSocketClosed()) {
+            Log.d(TAG, "socket is close");
+            try {
+                mSocket = new DatagramSocket(mClientPort); // Socket对象 // DatagramSocket(port) 绑定到指定本地的端口
+                Log.d(TAG, "new socket");
+            } catch (SocketException e) {
+                Log.e(TAG, "new DatagramSocket: " + e);
+            }
+        }
+    }
+
     /**
-     * 监听server
+     * 监听本地端口
      */
-    public void listener() {
-        if (mSocket != null && !mSocket.isClosed()) return;
+    public void receive() {
+        if (mLifecycle != null && mLifecycle != Lifecycle.Terminated) {
+            Log.i(TAG, "terminated");
+            return;
+        }
+        startReceive();
+    }
+
+    private void startReceive() {
+        Log.d(TAG, "start");
         mLifecycle = Lifecycle.New;
         initThreadExecutor();
         mIsDisconnect = false;
@@ -251,8 +277,9 @@ public class UDPClient {
      */
     public void disconnect() {
         mIsDisconnect = true;
-        shutdownNowThreadExecutor();
         finishSocket();
+        shutdownNowThreadExecutor();
+        mLifecycle = Lifecycle.Terminated;
         Log.i(TAG, "disconnect: interrupt");
     }
 
@@ -267,6 +294,7 @@ public class UDPClient {
 
     /**
      * 端口是否可用
+     *
      * @param port
      * @return
      */
@@ -334,7 +362,7 @@ public class UDPClient {
 
                         case 10007: // 正在链接
                             if (mOnServiceDataListener != null)
-                                mOnServiceDataListener.listenering();
+                                mOnServiceDataListener.listener();
                             break;
                     }
                 }
@@ -374,26 +402,44 @@ public class UDPClient {
         if (mConnectThread.isShutdown()) {
             mConnectThread = Executors.newSingleThreadExecutor();
         }
-        if (mDataHandlerThread.isShutdown()) {  // TODO待优化 初始化时机滞后到socket连接成功之后
-            mDataHandlerThread = Executors.newSingleThreadExecutor();
-        }
-        if (mSendDataThread.isShutdown()) {  // TODO待优化 初始化时机滞后到socket连接成功之后
-            mSendDataThread = Executors.newSingleThreadExecutor();
-        }
+//        if (mDataHandlerThread.isShutdown()) {  // TODO待优化 初始化时机滞后到socket连接成功之后
+//            mDataHandlerThread = Executors.newSingleThreadExecutor();
+//        }
     }
 
     /**
      * 关闭线程池
      */
     private void shutdownNowThreadExecutor() {
-        if (!mConnectThread.isShutdown()) {
-            mConnectThread.shutdownNow();
-        }
-        if (!mDataHandlerThread.isShutdown()) {
-            mDataHandlerThread.shutdownNow();
-        }
-        if (!mSendDataThread.isShutdown()) {
-            mSendDataThread.shutdownNow();
+        shutdown(mConnectThread);
+//        shutdown(mDataHandlerThread);
+        shutdown(mSendDataThread);
+    }
+
+    /**
+     * 关闭线程池
+     * 适合提交大量任务后的线程池关闭
+     *
+     * @param executorService
+     */
+    private void shutdown(ExecutorService executorService) {
+        if (executorService.isShutdown()) return;
+        executorService.shutdown(); // 启动关闭
+        try {
+            // 等待5秒，若任务仍未完成则强制终止（根据业务调整超时时间）
+            // 方法会阻塞当前线程，直到所有任务执行完成或超时，返回true表示线程池已关闭；若超时未完成则返回false
+            if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+                executorService.shutdownNow(); // 超时后强制关闭
+                // 再次等待3秒，确认强制关闭完成
+                if (!executorService.awaitTermination(3, TimeUnit.SECONDS)) {
+                    Log.e(TAG, "shutdown executor failure!");
+                }
+            }
+        } catch (InterruptedException e) {
+            Log.e(TAG, "shutdown executor exception:" + e);
+            // 等待过程中被中断，需再次触发强制关闭
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt(); // 保留中断状态
         }
     }
 
@@ -453,9 +499,9 @@ public class UDPClient {
     }
 
     public interface OnServiceDataListener {
-        void listener();
+        void begin(); // 开始
 
-        void listenering();
+        void listener();
 
         void receive(byte[] bytes);
 

@@ -546,14 +546,35 @@ public class SocketClient {
      * 关闭线程池
      */
     private void shutdownNowThreadExecutor() {
-        if (!mConnectThread.isShutdown()) {
-            mConnectThread.shutdownNow();
-        }
-        if (!mDataHandlerThread.isShutdown()) {
-            mDataHandlerThread.shutdownNow();
-        }
-        if (!mSendDataThread.isShutdown()) {
-            mSendDataThread.shutdownNow();
+        shutdown(mConnectThread);
+        shutdown(mDataHandlerThread);
+        shutdown(mSendDataThread);
+    }
+
+    /**
+     * 关闭线程池
+     * 适合提交大量任务后的线程池关闭
+     *
+     * @param executorService
+     */
+    private void shutdown(ExecutorService executorService) {
+        if (executorService.isShutdown()) return;
+        executorService.shutdown(); // 启动关闭
+        try {
+            // 等待5秒，若任务仍未完成则强制终止（根据业务调整超时时间）
+            // 方法会阻塞当前线程，直到所有任务执行完成或超时，返回true表示线程池已关闭；若超时未完成则返回false
+            if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+                executorService.shutdownNow(); // 超时后强制关闭
+                // 再次等待3秒，确认强制关闭完成
+                if (!executorService.awaitTermination(3, TimeUnit.SECONDS)) {
+                    Log.e(TAG, "shutdown executor failure!");
+                }
+            }
+        } catch (InterruptedException e) {
+            Log.e(TAG, "shutdown executor exception:" + e);
+            // 等待过程中被中断，需再次触发强制关闭
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt(); // 保留中断状态
         }
     }
 
